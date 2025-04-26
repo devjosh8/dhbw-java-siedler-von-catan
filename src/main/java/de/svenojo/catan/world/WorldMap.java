@@ -2,6 +2,7 @@ package de.svenojo.catan.world;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -31,7 +32,7 @@ public class WorldMap implements IRenderable, ITickable {
         for (int q = -mapRadius; q <= mapRadius; q++) {
             for (int r = Math.max(-mapRadius, -q - mapRadius); r <= Math.min(mapRadius, -q + mapRadius); r++) {
                 AxialVector tilePosition = new AxialVector(q, r);
-                WorldTile worldTile = new WorldTile(tilePosition, WorldTileType.WOODS);
+                WorldTile worldTile = new WorldTile(tilePosition, WorldTileType.values()[new Random().nextInt(WorldTileType.values().length)]);
                 mapTiles.add(worldTile);
             }
         }
@@ -41,6 +42,7 @@ public class WorldMap implements IRenderable, ITickable {
         for(WorldTile worldTile : mapTiles) {
            Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
            ModelInstance modelInstance = new ModelInstance(worldTileModel);
+
            modelInstance.transform.setToTranslation(worldTile.getWorldPosition().x, 0, worldTile.getWorldPosition().y);
            modelInstance.transform.scale(WorldTile.WORLD_TILE_SCALE, WorldTile.WORLD_TILE_SCALE, WorldTile.WORLD_TILE_SCALE);
            modelInstances.add(modelInstance);

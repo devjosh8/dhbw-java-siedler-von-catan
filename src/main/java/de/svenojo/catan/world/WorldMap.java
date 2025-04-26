@@ -7,9 +7,6 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.utils.Array;
-
-import de.svenojo.catan.core.Catan;
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.ITickable;
 import de.svenojo.catan.math.AxialVector;
@@ -36,14 +33,6 @@ public class WorldMap implements IRenderable, ITickable {
                 AxialVector tilePosition = new AxialVector(q, r);
                 WorldTile worldTile = new WorldTile(tilePosition, WorldTileType.WOODS);
                 mapTiles.add(worldTile);
-            }
-        }
-
-        List<String> alreadyLoading = new ArrayList<>();
-        for(WorldTile worldTile : mapTiles) {
-            if(!alreadyLoading.contains(worldTile.getWorldTileType().getFileName())) {
-                alreadyLoading.add(worldTile.getWorldTileType().getFileName());
-                catanAssetManager.getAssetManager().load(worldTile.getWorldTileType().getFileName(), Model.class);
             }
         }
     }

@@ -53,6 +53,7 @@ public class Catan extends Game {
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
         catanAssetManager = new CatanAssetManager();
+        catanAssetManager.initializeAssets();
         worldMap = new WorldMap(catanAssetManager);
         worldMap.generateMap();
         assetsLoading = true;

@@ -13,6 +13,7 @@ public class DesktopLauncher {
         configuration.useVsync(Globals.USE_VSYNC);
         configuration.setTitle(Globals.GAME_TITLE);
         configuration.setWindowedMode(Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
+        configuration.setWindowIcon("data/icons/window_icon48x48.png");
         new Lwjgl3Application(new Catan(), configuration);
     }
 }

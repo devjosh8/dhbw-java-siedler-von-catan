@@ -36,6 +36,12 @@
             <artifactId>gdx-openal</artifactId>
             <version>0.9.9</version>
         </dependency>
+        <!-- Testmodul für Unittests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.13.0-M2</version>
+        </dependency>
     </dependencies>
     <build>
         <finalName>${project.artifactId}-${project.version}</finalName>

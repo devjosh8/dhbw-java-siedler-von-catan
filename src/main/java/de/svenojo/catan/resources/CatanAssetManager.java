@@ -3,7 +3,7 @@ package de.svenojo.catan.resources;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.Model;
 
-import de.svenojo.catan.world.WorldTileType;
+import de.svenojo.catan.world.TileType;
 
 public class CatanAssetManager {
     
@@ -21,7 +21,7 @@ public class CatanAssetManager {
     public void initializeAssets() {
 
         // Modelle für die Map initialisieren
-       for(WorldTileType type : WorldTileType.values()) {
+       for(TileType type : TileType.values()) {
             loadModel(type.getFileName());
        }
     }

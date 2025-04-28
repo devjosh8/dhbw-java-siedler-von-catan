@@ -1,25 +1,26 @@
 package de.svenojo.catan.world;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;
 
-public class WorldTile {
+public class Tile {
     
     public static final float WORLD_TILE_SCALE = 0.02f;
 
     // bestimmt den Abstand zwischen zwei Hexzellen; 2.0f entspricht keinem Abstand
-    public static final float WORLD_TILE_DISTANCE = 2.1f;
+    public static final float WORLD_TILE_DISTANCE = 2.0f;
 
     // Koordinaten als axiale Koordinaten (Q verläuft vertikal, r verläuft diagonal)
     private AxialVector axialPosition;
-    private Vector2 worldPosition;
-    private WorldTileType worldTileType;
+    private Vector3 worldPosition;
+    private TileType worldTileType;
 
-    public WorldTile(AxialVector position, WorldTileType type) {
+    public Tile(AxialVector position, TileType type) {
         this.axialPosition = position;
         this.worldTileType = type;
-        this.worldPosition = new Vector2();
+        this.worldPosition = new Vector3();
         calculateWorldPosition();
     }
 
@@ -27,16 +28,16 @@ public class WorldTile {
         float size = WORLD_TILE_DISTANCE;
     
         float x = size * (float) Math.sqrt(3) * (axialPosition.getQ() + axialPosition.getR() / 2.0f);
-        float y = size * 1.5f * axialPosition.getR();
+        float z = size * 1.5f * axialPosition.getR();
     
-        worldPosition.set(x, y);
+        worldPosition.set(x, 0, z);
     }
 
-    public Vector2 getWorldPosition() {
+    public Vector3 getWorldPosition() {
         return worldPosition;
     }
 
-    public WorldTileType getWorldTileType() {
+    public TileType getWorldTileType() {
         return worldTileType;
     }
 
@@ -47,8 +48,8 @@ public class WorldTile {
     @Override
     public boolean equals(Object obj) {
         if(this == obj) return true;
-        if(!(obj instanceof WorldTile)) return false;
-        WorldTile worldTile = (WorldTile) obj;
+        if(!(obj instanceof Tile)) return false;
+        Tile worldTile = (Tile) obj;
         return worldTile.axialPosition.equals(axialPosition);
     }
 }

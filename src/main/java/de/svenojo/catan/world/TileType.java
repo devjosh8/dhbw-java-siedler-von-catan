@@ -1,6 +1,6 @@
 package de.svenojo.catan.world;
 
-public enum WorldTileType {
+public enum TileType {
     
     WOODS("data/models/karte_wald.g3db"),
     DESERT("data/models/karte_wueste.g3db"),
@@ -8,7 +8,7 @@ public enum WorldTileType {
 
 
     private String fileName;
-    WorldTileType(String fileName) {
+    TileType(String fileName) {
         this.fileName = fileName;
     }
 

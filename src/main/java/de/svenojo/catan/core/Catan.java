@@ -71,7 +71,6 @@ public class Catan extends Game {
         if(assetsLoading && catanAssetManager.getAssetManager().update()) doneLoading();
         
         cameraInputController.update();
-        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
 
         modelBatch.begin(perspectiveCamera);
@@ -93,5 +92,7 @@ public class Catan extends Game {
     public void resume() {}
 
     @Override
-    public void resize(int width, int height) {}
+    public void resize(int width, int height) {
+        Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    }
 }

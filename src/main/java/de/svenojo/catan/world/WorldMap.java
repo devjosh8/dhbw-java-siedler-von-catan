@@ -1,44 +1,54 @@
 package de.svenojo.catan.world;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.Environment;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
-
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.ITickable;
 import de.svenojo.catan.math.AxialVector;
+import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
+import de.svenojo.catan.world.building.Building;
+import de.svenojo.catan.world.building.BuildingType;
+import de.svenojo.catan.world.building.NodeBuilding;
+import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
 public class WorldMap implements IRenderable, ITickable {
     
     private List<Tile> mapTiles;
-    private List<ModelInstance> modelInstances;
+    private Set<ModelInstance> modelInstances;
     private List<Node> nodes;
+    private Set<Building> buildings;
 
-    private Graph<Node, DefaultEdge> nodeGraph;
-
-
+    private Graph<Node, Edge> nodeGraph;
     private CatanAssetManager catanAssetManager;
 
     public WorldMap(CatanAssetManager catanAssetManager) {
-        mapTiles = new ArrayList<>();
-        modelInstances = new ArrayList<>();
-        nodes = new ArrayList<>();
         this.catanAssetManager = catanAssetManager;
+        mapTiles = new ArrayList<>();
+        modelInstances = new HashSet<>();
+        nodes = new ArrayList<>();
+        buildings = new HashSet<>();
 
         nodeGraph = GraphTypeBuilder
-            .<Node, DefaultEdge> undirected().allowingMultipleEdges(false)
-            .allowingSelfLoops(false).edgeClass(DefaultEdge.class).weighted(false).buildGraph();
+            .<Node, Edge> undirected().allowingMultipleEdges(false)
+            .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
     }
 
     /**
@@ -137,6 +147,44 @@ public class WorldMap implements IRenderable, ITickable {
         }
     }
 
+    public void placeBuilding(Player player, Building building) {
+        if(building.getBuildingType() == BuildingType.STREET && building instanceof BuildingStreet) {
+            buildings.add(building);
+
+            ModelBuilder modelBuilder = new ModelBuilder();
+
+            // TODO: Platzhaltercode für Straße durch eigentliches Modell ersetzen
+            Model boxModel = modelBuilder.createBox(
+                1f, 1f, 5f,                                     // width, height, depth
+                new Material(ColorAttribute.createDiffuse(player.getColor())), // Material (z. B. blau)
+                Usage.Position | Usage.Normal                   // Vertex-Attribute
+            );
+            ModelInstance instance = new ModelInstance(boxModel);
+            
+
+            BuildingStreet buildingStreet = (BuildingStreet) building;
+
+            Vector3 position = new Vector3();
+            Node source = nodeGraph.getEdgeSource(buildingStreet.getPosition());
+            Node target = nodeGraph.getEdgeTarget(buildingStreet.getPosition());
+            position.y = 0.1f;
+
+            float delta_x = target.getPosition().x - source.getPosition().x;
+            float delta_z = target.getPosition().z - source.getPosition().z;
+            
+            double theta = Math.tan((double) delta_x / delta_z) * 10.0d; //??? Warum mal 10?? funktioniert aber ._. wtf
+
+            position.x = source.getPosition().x + (delta_x) / 2;
+            position.z = source.getPosition().z + (delta_z) / 2;
+            instance.transform.setToTranslation(position);
+            instance.transform.rotate(new Vector3(0, 1.0f, 0f), (float) (-theta));
+            instance.transform.scale(0.3f, 0.3f, 0.3f);
+            modelInstances.add(instance);
+        } else if(building instanceof NodeBuilding) {
+            // TODO: hier Settlement oder City platzieren
+        }
+    }
+
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
         modelBatch.render(modelInstances, environment);
@@ -144,4 +192,12 @@ public class WorldMap implements IRenderable, ITickable {
 
     @Override
     public void tick(float delta) { }
+
+    public Graph<Node, Edge> getNodeGraph() {
+        return nodeGraph;
+    }
+
+    public Set<Building> getBuildings() {
+        return buildings;
+    }
 }

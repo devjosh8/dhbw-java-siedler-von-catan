@@ -1,8 +1,11 @@
 package de.svenojo.catan.core;
 
 
+import java.util.Random;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g3d.Environment;
@@ -11,8 +14,11 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 
+import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
+import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.WorldMap;
+import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
 public class Catan extends Game {
 
@@ -62,6 +68,16 @@ public class Catan extends Game {
 
     private void doneLoading() {
         worldMap.loadModels();
+
+        // TODO: zum späteren Zeitpunkt entfernen
+        // Testweise Buildings hinzufügen
+        Player player = new Player("bob", Color.RED);
+        for(Edge edge : worldMap.getNodeGraph().edgeSet()) {
+            if(new Random().nextInt(3) == 0) {
+                BuildingStreet street = new BuildingStreet(player, edge);
+                worldMap.placeBuilding(player, street);
+            }
+        }
 
         assetsLoading = false;
     }

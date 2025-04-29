@@ -4,6 +4,7 @@ import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g3d.Model;
 
 import de.svenojo.catan.world.TileType;
+import de.svenojo.catan.world.building.BuildingType;
 
 public class CatanAssetManager {
     
@@ -21,9 +22,14 @@ public class CatanAssetManager {
     public void initializeAssets() {
 
         // Modelle für die Map initialisieren
-       for(TileType type : TileType.values()) {
+        for(TileType type : TileType.values()) {
             loadModel(type.getFileName());
-       }
+        }
+
+        // Modelle für Gebäude initialisieren
+        for(BuildingType type : BuildingType.values()) {
+            loadModel(type.getFileName());
+        }
     }
 
     public AssetManager getAssetManager() {

@@ -12,6 +12,8 @@ Zum builde mit dem Terminal in den Hauptpfad des Projektes gehen (dort wo die `p
 
 Die Jar wird bereits als "Fat-Jar" gebaut und kann somit ohne weitere installierte Abhängigkeiten ausgeführt werden (ausgenommen natürlich JVM).
 
+**WICHTIG: Java Version 21 verwenden!**
+
 ## Verwendete Abhängigkeiten
 
 Wir verwenden [LibGDX](https://libgdx.com/wiki/) als Hauptlibrary für das Spiel. Dazu am besten Tutorials oder Demos angucken, das meiste ist eigentlich selbsterklärend.

@@ -15,7 +15,9 @@ Die Jar wird bereits als "Fat-Jar" gebaut und kann somit ohne weitere installier
 ## Verwendete Abhängigkeiten
 
 Wir verwenden [LibGDX](https://libgdx.com/wiki/) als Hauptlibrary für das Spiel. Dazu am besten Tutorials oder Demos angucken, das meiste ist eigentlich selbsterklärend.
-Mit der Zeit werden weitere Abhängigkeiten hinzukommen, zum Beispiel für die Verwaltung von Text TTF und dergleichen.
+Weitere Abhängigkeiten:
+* [JGraphT](https://jgrapht.org/) 1.5.2 für eine graphentheoretische Darstellung von Ecken und Kanten
+* [JUnit](https://junit.org/junit5/) 5.13 für Unittests
 
 ## Clean Code
 

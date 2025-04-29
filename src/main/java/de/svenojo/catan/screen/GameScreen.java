@@ -1,10 +1,9 @@
-package de.svenojo.catan.core;
-
+package de.svenojo.catan.screen;
 
 import java.util.Random;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
@@ -14,14 +13,14 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 
+import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
-public class Catan extends Game {
-
+public class GameScreen implements Screen {
     /**
      * TODO: Kamera und Environment in eigene Klasse auslagern (Renderer.java oder sowat)
      */
@@ -35,8 +34,10 @@ public class Catan extends Game {
     private CatanAssetManager catanAssetManager;
     private boolean assetsLoading;
 
-    @Override
-    public void create() {
+    private CatanGame catanGame;
+
+    public GameScreen(CatanGame catanGame) {
+        this.catanGame = catanGame;
         modelBatch = new ModelBatch();
 
         environment = new Environment();
@@ -83,7 +84,7 @@ public class Catan extends Game {
     }
     
     @Override
-    public void render() {
+    public void render(float delta) {
         if(assetsLoading && catanAssetManager.getAssetManager().update()) doneLoading();
         
         cameraInputController.update();
@@ -110,5 +111,16 @@ public class Catan extends Game {
     @Override
     public void resize(int width, int height) {
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    }
+
+    @Override
+    public void show() {
+
+    }
+
+
+    @Override
+    public void hide() {
+
     }
 }

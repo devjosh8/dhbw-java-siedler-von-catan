@@ -4,7 +4,7 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
 
 import de.svenojo.catan.core.Globals;
-import de.svenojo.catan.core.Catan;
+import de.svenojo.catan.core.CatanGame;
 
 public class DesktopLauncher {
 
@@ -16,7 +16,7 @@ public class DesktopLauncher {
         configuration.setTitle(Globals.GAME_TITLE);
         configuration.setWindowedMode(Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
         configuration.setWindowIcon("data/icons/window_icon48x48.png");
-        new Lwjgl3Application(new Catan(), configuration);
+        new Lwjgl3Application(new CatanGame(), configuration);
     }
 
     public static boolean isMacOS() {

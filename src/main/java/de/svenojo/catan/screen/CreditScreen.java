@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -26,11 +27,14 @@ public class CreditScreen implements Screen {
     private Texture backgroundTexture;
 
     private CatanAssetManager catanAssetManager;
+    private BitmapFont bitmapFont;
 
     public CreditScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
 
         catanAssetManager = catanGame.getCatanAssetManager();
+
+        bitmapFont = catanAssetManager.mainFontWithoutBorder;
 
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -41,19 +45,27 @@ public class CreditScreen implements Screen {
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
 
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-
+        
+        Label.LabelStyle namesStyle = new Label.LabelStyle(bitmapFont, Color.WHITE);
+        
         Label creditsTitle = new Label("Entwickelt von:", skin, "title");
         creditsTitle.getStyle().fontColor = Color.WHITE;
+        creditsTitle.setFontScale(2f);
         creditsTitle.setAlignment(Align.center);
-        Label creditsNames = new Label("Sven Schraeer\nJoshua Kandel\n& Nora Streile\n© 2025", skin, "default");
-        creditsNames.getStyle().fontColor = Color.WHITE;
-        creditsNames.setFontScale(2f);
+        Label creditsNames = new Label("Sven Schräer\nJoshua Kandel\n& Nora Streile\n© 2025", namesStyle);
         creditsNames.setAlignment(Align.center);
+        
+        
+        TextButton.TextButtonStyle baseButtonStyle = skin.get(TextButton.TextButtonStyle.class);
+        TextButton.TextButtonStyle customButtonStyle = new TextButton.TextButtonStyle();
+        customButtonStyle.up = baseButtonStyle.up;
+        customButtonStyle.down = baseButtonStyle.down;
+        customButtonStyle.over = baseButtonStyle.over;
+        customButtonStyle.checked = baseButtonStyle.checked;
+        customButtonStyle.disabled = baseButtonStyle.disabled;
+        customButtonStyle.font = bitmapFont;
 
-        TextButton backButton = new TextButton("Zuruck zum Hauptmenu", skin);
+        TextButton backButton = new TextButton("Zurück zum Hauptmenü", customButtonStyle);
         backButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 this.catanGame.setScreen(new MainMenuScreen(this.catanGame));
@@ -61,18 +73,23 @@ public class CreditScreen implements Screen {
             }
             return false;
         });
-        backButton.getLabel().setFontScale(2f);
+        backButton.getLabel().setFontScale(1f);
 
+
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+        
         table.add(creditsTitle).padBottom(20);
         table.row();
         table.add(creditsNames).padBottom(80);
         table.row();
-        table.add(backButton).width(540).height(80);
-
+        table.add(backButton).width(560).height(80);
+        
         stage.addActor(backgroundImage);
         stage.addActor(table);
     }
-
+    
     @Override
     public void show() {
     }

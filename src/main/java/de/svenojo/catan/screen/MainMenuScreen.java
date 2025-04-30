@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -26,11 +27,16 @@ public class MainMenuScreen implements Screen {
     private Texture backgroundTexture;
 
     private CatanAssetManager catanAssetManager;
+    private BitmapFont bitmapFontWithBorder;
+    private BitmapFont bitmapFontWithoutBorder;
 
     public MainMenuScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
 
         catanAssetManager = catanGame.getCatanAssetManager();
+
+        bitmapFontWithBorder = catanAssetManager.mainFontWithBorder;
+        bitmapFontWithoutBorder = catanAssetManager.mainFontWithoutBorder;
         
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -40,28 +46,24 @@ public class MainMenuScreen implements Screen {
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
 
-        TextButton.TextButtonStyle originalStyle = skin.get(TextButton.TextButtonStyle.class);
-
-        // Kopiere ihn (optional, damit andere Buttons nicht betroffen sind)
-        TextButton.TextButtonStyle largerStyle = new TextButton.TextButtonStyle();
-        largerStyle.up = originalStyle.up;
-        largerStyle.down = originalStyle.down;
-        largerStyle.over = originalStyle.over;
-        largerStyle.checked = originalStyle.checked;
-        largerStyle.font = originalStyle.font;
-
-        // Vergrößere die Schrift
-        largerStyle.font.getData().setScale(2f); // z. B. doppelte Größe
-
-        Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch – wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", skin, "default");
+        Label.LabelStyle introductionStyle = new Label.LabelStyle(bitmapFontWithBorder, Color.WHITE);
+        
+        Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch - wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", introductionStyle);
         introduction.getStyle().fontColor = Color.WHITE;
-        introduction.setFontScale(2f);
         introduction.setAlignment(Align.center);
         introduction.setWrap(true);
-
-        // Erstelle Button mit angepasstem Stil
-        TextButton startButton = new TextButton("Spiel starten", largerStyle);
-
+        
+        
+        TextButton.TextButtonStyle baseButtonStyle = skin.get(TextButton.TextButtonStyle.class);
+        TextButton.TextButtonStyle customButtonStyle = new TextButton.TextButtonStyle();
+        customButtonStyle.up = baseButtonStyle.up;
+        customButtonStyle.down = baseButtonStyle.down;
+        customButtonStyle.over = baseButtonStyle.over;
+        customButtonStyle.checked = baseButtonStyle.checked;
+        customButtonStyle.disabled = baseButtonStyle.disabled;
+        customButtonStyle.font = bitmapFontWithoutBorder;
+        
+        TextButton startButton = new TextButton("Spiel starten", customButtonStyle);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 this.catanGame.setScreen(new GameScreen(this.catanGame));
@@ -71,8 +73,7 @@ public class MainMenuScreen implements Screen {
         });
 
 
-        TextButton creditButton = new TextButton("Credits", largerStyle);
-
+        TextButton creditButton = new TextButton("Credits", customButtonStyle);
         creditButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 this.catanGame.setScreen(new CreditScreen(this.catanGame));
@@ -81,8 +82,8 @@ public class MainMenuScreen implements Screen {
             return false;
         });
 
-        TextButton exitButton = new TextButton("Spiel verlassen", largerStyle);
 
+        TextButton exitButton = new TextButton("Spiel verlassen", customButtonStyle);
         exitButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 Gdx.app.exit();
@@ -92,11 +93,10 @@ public class MainMenuScreen implements Screen {
         });
 
 
-        // Zentriere den Button mit Table
         Table table = new Table();
         table.setFillParent(true);
         table.center();
-        table.add(introduction).width(1500).padBottom(50);;
+        table.add(introduction).width(1500).padTop(150).padBottom(50);;
         table.row();
         table.add(startButton).width(450).height(80);
         table.row();

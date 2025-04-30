@@ -4,14 +4,18 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.player.Player;
@@ -27,6 +31,7 @@ public class GameScreen implements Screen {
 
     private PerspectiveCamera perspectiveCamera;
     private ModelBatch modelBatch;
+    private SpriteBatch spriteBatch;
     private Environment environment;
     private CameraInputController cameraInputController;
 
@@ -39,6 +44,7 @@ public class GameScreen implements Screen {
     public GameScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
         modelBatch = new ModelBatch();
+        spriteBatch = new SpriteBatch();
 
         environment = new Environment();
 		environment.set(new ColorAttribute(ColorAttribute.AmbientLight, 0.4f, 0.4f, 0.4f, 1f));
@@ -62,13 +68,17 @@ public class GameScreen implements Screen {
 
         catanAssetManager = new CatanAssetManager();
         catanAssetManager.initializeAssets();
+
+        BitmapFont worldMapFont = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json")).getFont("font");
+        worldMapFont.getData().setScale(5.0f);
+
         worldMap = new WorldMap(catanAssetManager);
         worldMap.generateMap();
         assetsLoading = true;
     }
 
     private void doneLoading() {
-        worldMap.loadModels();
+        worldMap.loadAssets();
 
         // TODO: zum späteren Zeitpunkt entfernen
         // Testweise Buildings hinzufügen
@@ -95,6 +105,12 @@ public class GameScreen implements Screen {
             worldMap.render(modelBatch, environment);
         } 
         modelBatch.end();
+
+        spriteBatch.begin();
+        if(!assetsLoading) {
+            worldMap.render2D(spriteBatch, environment, perspectiveCamera);
+        } 
+        spriteBatch.end();
     }
 
     @Override

@@ -9,8 +9,10 @@ import java.util.Set;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -19,7 +21,9 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
+
 import de.svenojo.catan.interfaces.IRenderable;
+import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
 import de.svenojo.catan.math.AxialVector;
 import de.svenojo.catan.player.Player;
@@ -29,7 +33,7 @@ import de.svenojo.catan.world.building.BuildingType;
 import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
-public class WorldMap implements IRenderable, ITickable {
+public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     
     private List<Tile> mapTiles;
     private Set<ModelInstance> modelInstances;
@@ -39,8 +43,11 @@ public class WorldMap implements IRenderable, ITickable {
     private Graph<Node, Edge> nodeGraph;
     private CatanAssetManager catanAssetManager;
 
+    private BitmapFont bitmapFont;
+
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
+        this.bitmapFont = null;
         mapTiles = new ArrayList<>();
         modelInstances = new HashSet<>();
         nodes = new ArrayList<>();
@@ -136,7 +143,7 @@ public class WorldMap implements IRenderable, ITickable {
         }
     }
 
-    public void loadModels() {
+    public void loadAssets() {
         for(Tile worldTile : mapTiles) {
            Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
            ModelInstance modelInstance = new ModelInstance(worldTileModel);
@@ -145,6 +152,8 @@ public class WorldMap implements IRenderable, ITickable {
            modelInstance.transform.scale(Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE);
            modelInstances.add(modelInstance);
         }
+
+        bitmapFont = catanAssetManager.worldMapIslandNumberFont;
     }
 
     public void placeBuilding(Player player, Building building) {
@@ -188,6 +197,19 @@ public class WorldMap implements IRenderable, ITickable {
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
         modelBatch.render(modelInstances, environment);
+    }
+
+    @Override
+    public void render2D(SpriteBatch spriteBatch, Environment environment, Camera camera) {
+        for(Tile t : mapTiles) {
+            Vector3 textPosition = new Vector3(t.getWorldPosition().x, 1.5f, t.getWorldPosition().z);
+            Vector3 screenCoords = new Vector3(textPosition);
+            camera.project(screenCoords);
+
+            if (screenCoords.z > 0 && screenCoords.z < 1) {
+                bitmapFont.draw(spriteBatch, String.valueOf(t.getNumberValue()), screenCoords.x, screenCoords.y);
+            }
+        }
     }
 
     @Override

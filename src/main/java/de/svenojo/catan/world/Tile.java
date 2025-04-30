@@ -1,5 +1,7 @@
 package de.svenojo.catan.world;
 
+import java.util.Random;
+
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
@@ -17,10 +19,13 @@ public class Tile {
     private Vector3 worldPosition;
     private TileType worldTileType;
 
+    private int numberValue;
+
     public Tile(AxialVector position, TileType type) {
         this.axialPosition = position;
         this.worldTileType = type;
         this.worldPosition = new Vector3();
+        numberValue = new Random().nextInt(10);
         calculateWorldPosition();
     }
 
@@ -51,5 +56,9 @@ public class Tile {
         if(!(obj instanceof Tile)) return false;
         Tile worldTile = (Tile) obj;
         return worldTile.axialPosition.equals(axialPosition);
+    }
+
+    public int getNumberValue() {
+        return numberValue;
     }
 }

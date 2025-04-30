@@ -45,12 +45,17 @@ public class CreditScreen implements Screen {
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
 
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-
+        
         Label.LabelStyle namesStyle = new Label.LabelStyle(bitmapFont, Color.WHITE);
-
+        
+        Label creditsTitle = new Label("Entwickelt von:", skin, "title");
+        creditsTitle.getStyle().fontColor = Color.WHITE;
+        creditsTitle.setFontScale(2f);
+        creditsTitle.setAlignment(Align.center);
+        Label creditsNames = new Label("Sven Schräer\nJoshua Kandel\n& Nora Streile\n© 2025", namesStyle);
+        creditsNames.setAlignment(Align.center);
+        
+        
         TextButton.TextButtonStyle baseButtonStyle = skin.get(TextButton.TextButtonStyle.class);
         TextButton.TextButtonStyle customButtonStyle = new TextButton.TextButtonStyle();
         customButtonStyle.up = baseButtonStyle.up;
@@ -59,14 +64,6 @@ public class CreditScreen implements Screen {
         customButtonStyle.checked = baseButtonStyle.checked;
         customButtonStyle.disabled = baseButtonStyle.disabled;
         customButtonStyle.font = bitmapFont;
-
-
-        Label creditsTitle = new Label("Entwickelt von:", skin, "title");
-        creditsTitle.getStyle().fontColor = Color.WHITE;
-        creditsTitle.setFontScale(2f);
-        creditsTitle.setAlignment(Align.center);
-        Label creditsNames = new Label("Sven Schräer\nJoshua Kandel\n& Nora Streile\n© 2025", namesStyle);
-        creditsNames.setAlignment(Align.center);
 
         TextButton backButton = new TextButton("Zurück zum Hauptmenü", customButtonStyle);
         backButton.addListener(event -> {
@@ -78,16 +75,21 @@ public class CreditScreen implements Screen {
         });
         backButton.getLabel().setFontScale(1f);
 
+
+        Table table = new Table();
+        table.setFillParent(true);
+        table.center();
+        
         table.add(creditsTitle).padBottom(20);
         table.row();
         table.add(creditsNames).padBottom(80);
         table.row();
         table.add(backButton).width(560).height(80);
-
+        
         stage.addActor(backgroundImage);
         stage.addActor(table);
     }
-
+    
     @Override
     public void show() {
     }

@@ -22,6 +22,8 @@ public class CreditScreen implements Screen {
     private Stage stage;
     private Skin skin;
 
+    private Texture backgroundTexture;
+
     public CreditScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
 
@@ -30,7 +32,7 @@ public class CreditScreen implements Screen {
 
         skin = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json"));
 
-        Texture backgroundTexture = new Texture(Gdx.files.internal("data/images/blurred_dark_background.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("data/images/blurred_dark_background.png"));
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
 
@@ -100,5 +102,6 @@ public class CreditScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        backgroundTexture.dispose();
     }
 }

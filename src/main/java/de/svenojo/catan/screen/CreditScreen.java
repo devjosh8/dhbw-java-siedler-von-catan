@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.svenojo.catan.core.CatanGame;
+import de.svenojo.catan.resources.CatanAssetManager;
 
 public class CreditScreen implements Screen {
 
@@ -24,8 +25,12 @@ public class CreditScreen implements Screen {
 
     private Texture backgroundTexture;
 
+    private CatanAssetManager catanAssetManager;
+
     public CreditScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
+
+        catanAssetManager = catanGame.getCatanAssetManager();
 
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);

@@ -4,18 +4,15 @@ import java.util.Random;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 
 import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.player.Player;
@@ -66,8 +63,7 @@ public class GameScreen implements Screen {
 
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
-        catanAssetManager = new CatanAssetManager();
-        catanAssetManager.initializeAssets();
+        catanAssetManager = catanGame.getCatanAssetManager();
 
         worldMap = new WorldMap(catanAssetManager);
         worldMap.generateMap();

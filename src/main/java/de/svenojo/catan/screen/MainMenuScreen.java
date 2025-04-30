@@ -22,6 +22,7 @@ public class MainMenuScreen implements Screen {
     private Skin skin;
 
     private CatanGame catanGame;
+    private Texture backgroundTexture;
 
     public MainMenuScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
@@ -31,7 +32,7 @@ public class MainMenuScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json"));
         
-        Texture backgroundTexture = new Texture(Gdx.files.internal("data/images/Siedler_von_Catan.png"));
+        backgroundTexture = new Texture(Gdx.files.internal("data/images/Siedler_von_Catan.png"));
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
 
@@ -87,7 +88,6 @@ public class MainMenuScreen implements Screen {
         });
 
 
-
         // Zentriere den Button mit Table
         Table table = new Table();
         table.setFillParent(true);
@@ -138,6 +138,7 @@ public class MainMenuScreen implements Screen {
     public void dispose() {
         stage.dispose();
         skin.dispose();
+        backgroundTexture.dispose();
     }
     
 }

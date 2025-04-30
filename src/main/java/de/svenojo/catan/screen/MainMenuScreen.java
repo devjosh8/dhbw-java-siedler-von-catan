@@ -5,6 +5,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -26,11 +27,14 @@ public class MainMenuScreen implements Screen {
     private Texture backgroundTexture;
 
     private CatanAssetManager catanAssetManager;
+    private BitmapFont bitmapFont;
 
     public MainMenuScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
 
         catanAssetManager = catanGame.getCatanAssetManager();
+
+        bitmapFont = catanAssetManager.mainFontWithBorder;
         
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -52,10 +56,11 @@ public class MainMenuScreen implements Screen {
 
         // Vergrößere die Schrift
         largerStyle.font.getData().setScale(2f); // z. B. doppelte Größe
+        
+        Label.LabelStyle introductionStyle = new Label.LabelStyle(bitmapFont, Color.WHITE);
 
-        Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch – wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", skin, "default");
+        Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch - wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", introductionStyle);
         introduction.getStyle().fontColor = Color.WHITE;
-        introduction.setFontScale(2f);
         introduction.setAlignment(Align.center);
         introduction.setWrap(true);
 
@@ -96,7 +101,7 @@ public class MainMenuScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
         table.center();
-        table.add(introduction).width(1500).padBottom(50);;
+        table.add(introduction).width(1500).padTop(80).padBottom(50);;
         table.row();
         table.add(startButton).width(450).height(80);
         table.row();

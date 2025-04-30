@@ -15,6 +15,8 @@ public class CatanAssetManager {
     private AssetManager assetManager;
 
     public BitmapFont worldMapIslandNumberFont;
+    public BitmapFont mainFontWithoutBorder;
+    public BitmapFont mainFontWithBorder;
 
     public CatanAssetManager() {
         assetManager = new AssetManager();
@@ -47,6 +49,32 @@ public class CatanAssetManager {
         robotoParameter.borderStraight = false;
         worldMapIslandNumberFont = robotoGenerator.generateFont(robotoParameter);
         robotoGenerator.dispose();
+
+        initializeAssetsForMainMenu();
+        initializeAssetsForCreditMenu();
+    }
+
+    private void initializeAssetsForCreditMenu() {
+        FreeTypeFontGenerator robotoThinGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-Thin.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter robotoThinParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        robotoThinParameter.size = 48;
+        robotoThinParameter.color = Color.WHITE;
+
+        mainFontWithoutBorder = robotoThinGenerator.generateFont(robotoThinParameter);
+        robotoThinGenerator.dispose();
+    }
+
+    private void initializeAssetsForMainMenu() {
+        FreeTypeFontGenerator robotoThinGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-SemiBold.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter robotoThinParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        robotoThinParameter.size = 40;
+        robotoThinParameter.color = Color.WHITE;
+        robotoThinParameter.shadowOffsetX = 2;
+        robotoThinParameter.shadowOffsetY = 2;
+        robotoThinParameter.shadowColor = new Color(0, 0, 0, 0.75f);
+
+        mainFontWithBorder = robotoThinGenerator.generateFont(robotoThinParameter);
+        robotoThinGenerator.dispose();
     }
 
     public AssetManager getAssetManager() {

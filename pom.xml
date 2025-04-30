@@ -36,6 +36,12 @@
             <artifactId>gdx-openal</artifactId>
             <version>0.9.9</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/com.badlogicgames.gdx/gdx-freetype -->
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-freetype</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
         <!-- Testmodul für Unittests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

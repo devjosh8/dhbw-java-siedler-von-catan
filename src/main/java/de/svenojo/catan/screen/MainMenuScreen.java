@@ -96,7 +96,7 @@ public class MainMenuScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
         table.center();
-        table.add(introduction).width(1500).padTop(80).padBottom(50);;
+        table.add(introduction).width(1500).padTop(150).padBottom(50);;
         table.row();
         table.add(startButton).width(450).height(80);
         table.row();

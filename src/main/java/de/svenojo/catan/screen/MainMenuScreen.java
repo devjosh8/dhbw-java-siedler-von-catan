@@ -3,7 +3,9 @@ package de.svenojo.catan.screen;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
@@ -15,16 +17,20 @@ public class MainMenuScreen implements Screen {
 
     private Stage stage;
     private Skin skin;
-    private TextButton button;
 
     private CatanGame catanGame;
 
     public MainMenuScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
 
+        
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json"));
+        
+        Texture backgroundTexture = new Texture(Gdx.files.internal("data/images/background.png"));
+        Image backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setFillParent(true);
 
         TextButton.TextButtonStyle originalStyle = skin.get(TextButton.TextButtonStyle.class);
 
@@ -40,10 +46,9 @@ public class MainMenuScreen implements Screen {
         largerStyle.font.getData().setScale(2f); // z. B. doppelte Größe
 
         // Erstelle Button mit angepasstem Stil
-        button = new TextButton("Spiel starten!", largerStyle);
+        TextButton startButton = new TextButton("Spiel starten", largerStyle);
 
-        
-        button.addListener(event -> {
+        startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 this.catanGame.setScreen(new GameScreen(this.catanGame));
                 return true;
@@ -51,11 +56,40 @@ public class MainMenuScreen implements Screen {
             return false;
         });
 
+
+        TextButton creditButton = new TextButton("Credits", largerStyle);
+
+        creditButton.addListener(event -> {
+            if (event.toString().equals("touchDown")) {
+                this.catanGame.setScreen(new CreditScreen(this.catanGame));
+                return true;
+            }
+            return false;
+        });
+
+        TextButton exitButton = new TextButton("Spiel verlassen", largerStyle);
+
+        exitButton.addListener(event -> {
+            if (event.toString().equals("touchDown")) {
+                Gdx.app.exit();
+                return true;
+            }
+            return false;
+        });
+
+
+
         // Zentriere den Button mit Table
         Table table = new Table();
         table.setFillParent(true);
         table.center();
-        table.add(button).width(650).height(80);
+        table.add(startButton).width(650).height(80);
+        table.row();
+        table.add(creditButton).width(650).height(80).padTop(20);
+        table.row();
+        table.add(exitButton).width(650).height(80).padTop(20);
+
+        stage.addActor(backgroundImage);
         stage.addActor(table);
     }
 

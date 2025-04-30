@@ -69,9 +69,6 @@ public class GameScreen implements Screen {
         catanAssetManager = new CatanAssetManager();
         catanAssetManager.initializeAssets();
 
-        BitmapFont worldMapFont = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json")).getFont("font");
-        worldMapFont.getData().setScale(5.0f);
-
         worldMap = new WorldMap(catanAssetManager);
         worldMap.generateMap();
         assetsLoading = true;

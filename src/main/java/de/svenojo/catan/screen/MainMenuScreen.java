@@ -27,14 +27,16 @@ public class MainMenuScreen implements Screen {
     private Texture backgroundTexture;
 
     private CatanAssetManager catanAssetManager;
-    private BitmapFont bitmapFont;
+    private BitmapFont bitmapFontWithBorder;
+    private BitmapFont bitmapFontWithoutBorder;
 
     public MainMenuScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
 
         catanAssetManager = catanGame.getCatanAssetManager();
 
-        bitmapFont = catanAssetManager.mainFontWithBorder;
+        bitmapFontWithBorder = catanAssetManager.mainFontWithBorder;
+        bitmapFontWithoutBorder = catanAssetManager.mainFontWithoutBorder;
         
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -45,6 +47,15 @@ public class MainMenuScreen implements Screen {
         backgroundImage.setFillParent(true);
 
         TextButton.TextButtonStyle originalStyle = skin.get(TextButton.TextButtonStyle.class);
+
+        TextButton.TextButtonStyle baseButtonStyle = skin.get(TextButton.TextButtonStyle.class);
+        TextButton.TextButtonStyle customButtonStyle = new TextButton.TextButtonStyle();
+        customButtonStyle.up = baseButtonStyle.up;
+        customButtonStyle.down = baseButtonStyle.down;
+        customButtonStyle.over = baseButtonStyle.over;
+        customButtonStyle.checked = baseButtonStyle.checked;
+        customButtonStyle.disabled = baseButtonStyle.disabled;
+        customButtonStyle.font = bitmapFontWithoutBorder;
 
         // Kopiere ihn (optional, damit andere Buttons nicht betroffen sind)
         TextButton.TextButtonStyle largerStyle = new TextButton.TextButtonStyle();
@@ -57,7 +68,7 @@ public class MainMenuScreen implements Screen {
         // Vergrößere die Schrift
         largerStyle.font.getData().setScale(2f); // z. B. doppelte Größe
         
-        Label.LabelStyle introductionStyle = new Label.LabelStyle(bitmapFont, Color.WHITE);
+        Label.LabelStyle introductionStyle = new Label.LabelStyle(bitmapFontWithBorder, Color.WHITE);
 
         Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch - wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", introductionStyle);
         introduction.getStyle().fontColor = Color.WHITE;
@@ -65,7 +76,7 @@ public class MainMenuScreen implements Screen {
         introduction.setWrap(true);
 
         // Erstelle Button mit angepasstem Stil
-        TextButton startButton = new TextButton("Spiel starten", largerStyle);
+        TextButton startButton = new TextButton("Spiel starten", customButtonStyle);
 
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
@@ -76,7 +87,7 @@ public class MainMenuScreen implements Screen {
         });
 
 
-        TextButton creditButton = new TextButton("Credits", largerStyle);
+        TextButton creditButton = new TextButton("Credits", customButtonStyle);
 
         creditButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
@@ -86,7 +97,7 @@ public class MainMenuScreen implements Screen {
             return false;
         });
 
-        TextButton exitButton = new TextButton("Spiel verlassen", largerStyle);
+        TextButton exitButton = new TextButton("Spiel verlassen", customButtonStyle);
 
         exitButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {

@@ -2,13 +2,16 @@ package de.svenojo.catan.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.svenojo.catan.core.CatanGame;
@@ -28,7 +31,7 @@ public class MainMenuScreen implements Screen {
         Gdx.input.setInputProcessor(stage);
         skin = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json"));
         
-        Texture backgroundTexture = new Texture(Gdx.files.internal("data/images/background.png"));
+        Texture backgroundTexture = new Texture(Gdx.files.internal("data/images/Siedler_von_Catan.png"));
         Image backgroundImage = new Image(backgroundTexture);
         backgroundImage.setFillParent(true);
 
@@ -44,6 +47,12 @@ public class MainMenuScreen implements Screen {
 
         // Vergrößere die Schrift
         largerStyle.font.getData().setScale(2f); // z. B. doppelte Größe
+
+        Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch – wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", skin, "default");
+        introduction.getStyle().fontColor = Color.WHITE;
+        introduction.setFontScale(2f);
+        introduction.setAlignment(Align.center);
+        introduction.setWrap(true);
 
         // Erstelle Button mit angepasstem Stil
         TextButton startButton = new TextButton("Spiel starten", largerStyle);
@@ -83,11 +92,13 @@ public class MainMenuScreen implements Screen {
         Table table = new Table();
         table.setFillParent(true);
         table.center();
-        table.add(startButton).width(650).height(80);
+        table.add(introduction).width(1500).padBottom(50);;
         table.row();
-        table.add(creditButton).width(650).height(80).padTop(20);
+        table.add(startButton).width(450).height(80);
         table.row();
-        table.add(exitButton).width(650).height(80).padTop(20);
+        table.add(creditButton).width(450).height(80).padTop(20);
+        table.row();
+        table.add(exitButton).width(450).height(80).padTop(20);
 
         stage.addActor(backgroundImage);
         stage.addActor(table);

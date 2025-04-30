@@ -2,12 +2,16 @@ package de.svenojo.catan.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 import de.svenojo.catan.core.CatanGame;
@@ -26,15 +30,23 @@ public class CreditScreen implements Screen {
 
         skin = new Skin(Gdx.files.internal("data/ui/flat-earth/skin/flat-earth-ui.json"));
 
+        Texture backgroundTexture = new Texture(Gdx.files.internal("data/images/blurred_dark_background.png"));
+        Image backgroundImage = new Image(backgroundTexture);
+        backgroundImage.setFillParent(true);
+
         Table table = new Table();
         table.setFillParent(true);
         table.center();
 
         Label creditsTitle = new Label("Entwickelt von:", skin, "title");
-        Label creditsNames = new Label("Sven Schraeer\nJoshua Kandel \n& Nora Streile\n© 2025", skin, "default");
+        creditsTitle.getStyle().fontColor = Color.WHITE;
+        creditsTitle.setAlignment(Align.center);
+        Label creditsNames = new Label("Sven Schraeer\nJoshua Kandel\n& Nora Streile\n© 2025", skin, "default");
+        creditsNames.getStyle().fontColor = Color.WHITE;
         creditsNames.setFontScale(2f);
+        creditsNames.setAlignment(Align.center);
 
-        TextButton backButton = new TextButton("Zurück zum Hauptmenü", skin);
+        TextButton backButton = new TextButton("Zuruck zum Hauptmenu", skin);
         backButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 this.catanGame.setScreen(new MainMenuScreen(this.catanGame));
@@ -48,8 +60,9 @@ public class CreditScreen implements Screen {
         table.row();
         table.add(creditsNames).padBottom(80);
         table.row();
-        table.add(backButton).width(600).height(80);
+        table.add(backButton).width(540).height(80);
 
+        stage.addActor(backgroundImage);
         stage.addActor(table);
     }
 

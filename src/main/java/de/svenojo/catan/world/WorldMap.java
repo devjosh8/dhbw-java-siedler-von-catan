@@ -12,6 +12,7 @@ import org.jgrapht.graph.builder.GraphTypeBuilder;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -206,8 +207,11 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             Vector3 screenCoords = new Vector3(textPosition);
             camera.project(screenCoords);
 
+            GlyphLayout layout = new GlyphLayout();
+            layout.setText(bitmapFont, String.valueOf(t.getNumberValue()));
+
             if (screenCoords.z > 0 && screenCoords.z < 1) {
-                bitmapFont.draw(spriteBatch, String.valueOf(t.getNumberValue()), screenCoords.x, screenCoords.y);
+                bitmapFont.draw(spriteBatch, String.valueOf(t.getNumberValue()), screenCoords.x - layout.width / 2, screenCoords.y + layout.height / 2);
             }
         }
     }

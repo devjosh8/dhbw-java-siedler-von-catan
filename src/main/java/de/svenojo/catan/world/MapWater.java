@@ -45,7 +45,7 @@ public class MapWater implements ITickable, IRenderable {
     public void loadAssets() {
         this.waterShader = catanAssetManager.waterShader;
 
-        Model waterPlaneModel = createWaterPlane(WATER_PLANE_SIZE, 100, 80f);
+        Model waterPlaneModel = createWaterPlane(WATER_PLANE_SIZE, 1, 80f);
         waterPlaneInstance = new ModelInstance(waterPlaneModel);
 
         /**

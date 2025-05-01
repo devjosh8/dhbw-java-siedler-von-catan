@@ -1,4 +1,4 @@
-package de.svenojo.catan.world;
+package de.svenojo.catan.world.tile;
 
 public enum TileType {
     

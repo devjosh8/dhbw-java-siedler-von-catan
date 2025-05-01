@@ -33,6 +33,8 @@ import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingType;
 import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
+import de.svenojo.catan.world.tile.Tile;
+import de.svenojo.catan.world.tile.TileType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     

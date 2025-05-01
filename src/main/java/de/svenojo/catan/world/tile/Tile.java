@@ -1,8 +1,7 @@
-package de.svenojo.catan.world;
+package de.svenojo.catan.world.tile;
 
 import java.util.Random;
 
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;

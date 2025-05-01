@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Model;
 
 import de.svenojo.catan.core.Globals;
-import de.svenojo.catan.world.TileType;
 import de.svenojo.catan.world.building.BuildingType;
+import de.svenojo.catan.world.tile.TileType;
 
 public class CatanAssetManager {
     

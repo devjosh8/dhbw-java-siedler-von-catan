@@ -5,6 +5,8 @@ import java.util.Set;
 
 import com.badlogic.gdx.math.Vector3;
 
+import de.svenojo.catan.world.tile.Tile;
+
 public class Node {
     
     private Vector3 position;

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Model;
 
+import de.svenojo.catan.core.Globals;
 import de.svenojo.catan.world.TileType;
 import de.svenojo.catan.world.building.BuildingType;
 
@@ -41,7 +42,7 @@ public class CatanAssetManager {
 
         FreeTypeFontGenerator robotoGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-Bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter robotoParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        robotoParameter.size = 48;
+        robotoParameter.size = Globals.IS_MACOS ? 48 : 24;
         robotoParameter.color = Color.WHITE;
 
         robotoParameter.borderWidth = 2f; 
@@ -57,7 +58,7 @@ public class CatanAssetManager {
     private void initializeAssetsForCreditMenu() {
         FreeTypeFontGenerator robotoThinGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-Thin.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter robotoThinParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        robotoThinParameter.size = 48;
+        robotoThinParameter.size =  Globals.IS_MACOS ? 48 : 24;
         robotoThinParameter.color = Color.WHITE;
 
         mainFontWithoutBorder = robotoThinGenerator.generateFont(robotoThinParameter);
@@ -67,7 +68,7 @@ public class CatanAssetManager {
     private void initializeAssetsForMainMenu() {
         FreeTypeFontGenerator robotoThinGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-SemiBold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter robotoThinParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        robotoThinParameter.size = 40;
+        robotoThinParameter.size = Globals.IS_MACOS ? 40 : 20;
         robotoThinParameter.color = Color.WHITE;
         robotoThinParameter.shadowOffsetX = 2;
         robotoThinParameter.shadowOffsetY = 2;

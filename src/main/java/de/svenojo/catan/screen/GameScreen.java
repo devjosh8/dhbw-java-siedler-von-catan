@@ -18,6 +18,7 @@ import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.Edge;
+import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
@@ -33,6 +34,7 @@ public class GameScreen implements Screen {
     private CameraInputController cameraInputController;
 
     private WorldMap worldMap;
+    private MapWater mapWater;
     private CatanAssetManager catanAssetManager;
     private boolean assetsLoading;
 
@@ -67,11 +69,13 @@ public class GameScreen implements Screen {
 
         worldMap = new WorldMap(catanAssetManager);
         worldMap.generateMap();
+        mapWater = new MapWater(catanAssetManager);
         assetsLoading = true;
     }
 
     private void doneLoading() {
         worldMap.loadAssets();
+        mapWater.loadAssets();
 
         // TODO: zum späteren Zeitpunkt entfernen
         // Testweise Buildings hinzufügen
@@ -96,6 +100,7 @@ public class GameScreen implements Screen {
         modelBatch.begin(perspectiveCamera);
         if(!assetsLoading) {
             worldMap.render(modelBatch, environment);
+            mapWater.render(modelBatch, environment);
         } 
         modelBatch.end();
 

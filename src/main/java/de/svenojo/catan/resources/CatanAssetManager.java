@@ -3,9 +3,12 @@ package de.svenojo.catan.resources;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.svenojo.catan.core.Globals;
 import de.svenojo.catan.world.building.BuildingType;
@@ -18,6 +21,13 @@ public class CatanAssetManager {
     public BitmapFont worldMapIslandNumberFont;
     public BitmapFont mainFontWithoutBorder;
     public BitmapFont mainFontWithBorder;
+
+    public ShaderProgram waterShader;
+
+
+    public Texture waterTexture;
+    public Texture waterOffsetTexture;
+    public Texture waterNormalTexture;
 
     public CatanAssetManager() {
         assetManager = new AssetManager();
@@ -51,6 +61,24 @@ public class CatanAssetManager {
         worldMapIslandNumberFont = robotoGenerator.generateFont(robotoParameter);
         robotoGenerator.dispose();
 
+
+        waterShader = new ShaderProgram(
+            Gdx.files.internal("data/shaders/water_vertex.glsl"),
+            Gdx.files.internal("data/shaders/water_fragment.glsl")
+        );
+        if(!waterShader.isCompiled()) {
+            throw new GdxRuntimeException("Shader compilation error: " + waterShader.getLog());
+        }
+
+        waterTexture = new Texture(Gdx.files.internal("data/textures/water/water_diffuse.png"));
+        waterTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+
+        waterOffsetTexture = new Texture(Gdx.files.internal("data/textures/water/water_uv_offset.png"));
+        waterOffsetTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+
+        waterNormalTexture = new Texture(Gdx.files.internal("data/textures/water/water_normal.png"));
+        waterNormalTexture.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+        
         initializeAssetsForMainMenu();
         initializeAssetsForCreditMenu();
     }

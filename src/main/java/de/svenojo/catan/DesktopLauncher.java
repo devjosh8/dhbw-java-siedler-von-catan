@@ -12,7 +12,10 @@ public class DesktopLauncher {
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setIdleFPS(Globals.FPS);
         configuration.useVsync(Globals.USE_VSYNC);
-        if(isMacOS()) configuration.setHdpiMode(HdpiMode.Pixels);
+        if(isMacOS()) {
+            configuration.setHdpiMode(HdpiMode.Pixels);
+            Globals.IS_MACOS = true;
+        }
         configuration.setTitle(Globals.GAME_TITLE);
         configuration.setWindowedMode(Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
         configuration.setWindowIcon("data/icons/window_icon48x48.png");

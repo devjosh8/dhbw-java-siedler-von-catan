@@ -8,4 +8,6 @@ public class Globals {
     public static final int GAME_HEIGHT = 720;
     public static final int FPS = 60;
     public static final boolean USE_VSYNC = true;
+
+    public static boolean IS_MACOS = false;
 }

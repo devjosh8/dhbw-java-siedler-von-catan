@@ -10,6 +10,7 @@ import org.jgrapht.Graph;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 
 import com.badlogic.gdx.graphics.Camera;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
 
@@ -148,12 +150,19 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     public void loadAssets() {
         for(Tile worldTile : mapTiles) {
-           Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
-           ModelInstance modelInstance = new ModelInstance(worldTileModel);
+            Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
+            ModelInstance modelInstance = new ModelInstance(worldTileModel);
 
-           modelInstance.transform.setToTranslation(worldTile.getWorldPosition().x, 0, worldTile.getWorldPosition().z);
-           modelInstance.transform.scale(Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE);
-           modelInstances.add(modelInstance);
+            modelInstance.transform.setToTranslation(worldTile.getWorldPosition().x, 0, worldTile.getWorldPosition().z);
+            modelInstance.transform.scale(Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE);
+
+            // Specular Map neu machen, damit die Map nicht mehr so glänzt
+            Material material = modelInstance.materials.get(0);
+            material.remove(ColorAttribute.Specular);
+            material.set(ColorAttribute.createSpecular(Color.BLACK));
+            material.set(FloatAttribute.createShininess(2f));
+
+            modelInstances.add(modelInstance);
         }
 
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;

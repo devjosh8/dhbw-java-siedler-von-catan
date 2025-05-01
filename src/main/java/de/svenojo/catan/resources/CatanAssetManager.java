@@ -2,6 +2,7 @@ package de.svenojo.catan.resources;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -28,6 +29,8 @@ public class CatanAssetManager {
     public Texture waterTexture;
     public Texture waterOffsetTexture;
     public Texture waterNormalTexture;
+
+    public Sound clickSound;
 
     public CatanAssetManager() {
         assetManager = new AssetManager();
@@ -81,6 +84,7 @@ public class CatanAssetManager {
         
         initializeAssetsForMainMenu();
         initializeAssetsForCreditMenu();
+        initializeSounds();
     }
 
     private void initializeAssetsForCreditMenu() {
@@ -106,6 +110,10 @@ public class CatanAssetManager {
         robotoThinGenerator.dispose();
     }
 
+    private void initializeSounds() {
+        loadSound("data/sounds/click_sound.wav");
+    }
+
     public AssetManager getAssetManager() {
         return assetManager;
     }
@@ -115,6 +123,19 @@ public class CatanAssetManager {
 	 */
 	public synchronized Model getModel(String fileName) {
 		return assetManager.get(fileName, Model.class);
+	}
+
+    /** @param fileName Dateipfad der Datei
+	 * @return Model
+	 */
+	public synchronized Sound getSound(String fileName) {
+		return assetManager.get(fileName, Sound.class);
+	}
+
+    /** @param fileName Dateipfad der Datei
+	 */
+	public synchronized void loadSound(String fileName) {
+		assetManager.load(fileName, Sound.class);
 	}
 
     /** @param fileName Dateipfad der Datei

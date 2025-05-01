@@ -2,6 +2,7 @@ package de.svenojo.catan.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -29,6 +30,8 @@ public class MainMenuScreen implements Screen {
     private CatanAssetManager catanAssetManager;
     private BitmapFont bitmapFontWithBorder;
     private BitmapFont bitmapFontWithoutBorder;
+
+    private Sound clickSound;
 
     public MainMenuScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
@@ -66,6 +69,7 @@ public class MainMenuScreen implements Screen {
         TextButton startButton = new TextButton("Spiel starten", customButtonStyle);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
+                clickSound.play();
                 this.catanGame.setScreen(new GameScreen(this.catanGame));
                 return true;
             }
@@ -76,6 +80,7 @@ public class MainMenuScreen implements Screen {
         TextButton creditButton = new TextButton("Credits", customButtonStyle);
         creditButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
+                clickSound.play();
                 this.catanGame.setScreen(new CreditScreen(this.catanGame));
                 return true;
             }
@@ -86,11 +91,14 @@ public class MainMenuScreen implements Screen {
         TextButton exitButton = new TextButton("Spiel verlassen", customButtonStyle);
         exitButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
+                clickSound.play();
                 Gdx.app.exit();
                 return true;
             }
             return false;
         });
+
+        clickSound = catanAssetManager.getSound("data/sounds/click_sound.wav");
 
 
         Table table = new Table();

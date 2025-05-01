@@ -2,6 +2,7 @@ package de.svenojo.catan.screen;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
@@ -28,6 +29,8 @@ public class CreditScreen implements Screen {
 
     private CatanAssetManager catanAssetManager;
     private BitmapFont bitmapFont;
+
+    private Sound clickSound;
 
     public CreditScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
@@ -68,6 +71,7 @@ public class CreditScreen implements Screen {
         TextButton backButton = new TextButton("Zurück zum Hauptmenü", customButtonStyle);
         backButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
+                clickSound.play();
                 this.catanGame.setScreen(new MainMenuScreen(this.catanGame));
                 return true;
             }
@@ -75,6 +79,8 @@ public class CreditScreen implements Screen {
         });
         backButton.getLabel().setFontScale(1f);
 
+
+        clickSound = catanAssetManager.getSound("data/sounds/click_sound.wav");
 
         Table table = new Table();
         table.setFillParent(true);

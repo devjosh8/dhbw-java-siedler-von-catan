@@ -171,7 +171,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 new Material(ColorAttribute.createDiffuse(player.getColor())), // Material (z. B. blau)
                 Usage.Position | Usage.Normal                   // Vertex-Attribute
             );
-            ModelInstance instance = new ModelInstance(boxModel);
+            ModelInstance instance = new ModelInstance(catanAssetManager.getModel(building.getBuildingType().getFileName()));
             
 
             BuildingStreet buildingStreet = (BuildingStreet) building;
@@ -179,7 +179,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             Vector3 position = new Vector3();
             Node source = nodeGraph.getEdgeSource(buildingStreet.getPosition());
             Node target = nodeGraph.getEdgeTarget(buildingStreet.getPosition());
-            position.y = 0.1f;
 
             float delta_x = target.getPosition().x - source.getPosition().x;
             float delta_z = target.getPosition().z - source.getPosition().z;
@@ -188,9 +187,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
             position.x = source.getPosition().x + (delta_x) / 2;
             position.z = source.getPosition().z + (delta_z) / 2;
+            position.y = 0.1f;
             instance.transform.setToTranslation(position);
             instance.transform.rotate(new Vector3(0, 1.0f, 0f), (float) (-theta));
-            instance.transform.scale(0.3f, 0.3f, 0.3f);
+            instance.transform.scale(0.015f, 0.015f, 0.017f);
             modelInstances.add(instance);
         } else if(building instanceof NodeBuilding) {
             // TODO: hier Settlement oder City platzieren

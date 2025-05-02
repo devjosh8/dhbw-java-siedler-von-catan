@@ -173,15 +173,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     public void placeBuilding(Player player, Building building) {
         if(building.getBuildingType() == BuildingType.STREET && building instanceof BuildingStreet) {
             buildings.add(building);
-
-            ModelBuilder modelBuilder = new ModelBuilder();
-
-            // TODO: Platzhaltercode für Straße durch eigentliches Modell ersetzen
-            Model boxModel = modelBuilder.createBox(
-                1f, 1f, 5f,                                     // width, height, depth
-                new Material(ColorAttribute.createDiffuse(player.getColor())), // Material (z. B. blau)
-                Usage.Position | Usage.Normal                   // Vertex-Attribute
-            );
+            
             ModelInstance instance = new ModelInstance(catanAssetManager.getModel(building.getBuildingType().getFileName()));
             
 

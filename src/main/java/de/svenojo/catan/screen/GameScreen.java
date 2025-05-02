@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
+import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 
 import de.svenojo.catan.core.CatanGame;
@@ -20,6 +21,7 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
+import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
 public class GameScreen implements Screen {
@@ -80,10 +82,11 @@ public class GameScreen implements Screen {
         // TODO: zum späteren Zeitpunkt entfernen
         // Testweise Buildings hinzufügen
         Player player = new Player("bob", Color.RED);
-        for(Edge edge : worldMap.getNodeGraph().edgeSet()) {
+        for(Edge node : worldMap.getNodeGraph().edgeSet()) {
             if(new Random().nextInt(3) == 0) {
-                BuildingStreet street = new BuildingStreet(player, edge);
-                worldMap.placeBuilding(player, street);
+                //BuildingStreet street = new BuildingStreet(player, edge);
+                BuildingSettlement settlement = new BuildingSettlement(player, worldMap.getNodeGraph().getEdgeSource(node));
+                worldMap.placeBuilding(player, settlement);
             }
         }
 

@@ -54,7 +54,7 @@ public class GameScreen implements Screen {
         perspectiveCamera = new PerspectiveCamera(67, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         perspectiveCamera.position.set(0f, 20f, 0f);
         perspectiveCamera.lookAt(0, 0f, 0);
-        perspectiveCamera.near = 1f;
+        perspectiveCamera.near = 0.1f;
         perspectiveCamera.far = 300f;
         perspectiveCamera.update();
 

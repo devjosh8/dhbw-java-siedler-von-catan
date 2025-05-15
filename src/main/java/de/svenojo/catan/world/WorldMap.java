@@ -9,6 +9,7 @@ import java.util.Set;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
@@ -23,7 +24,18 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.physics.bullet.Bullet;
+import com.badlogic.gdx.physics.bullet.collision.ClosestRayResultCallback;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
+import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
+import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
+import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
 
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.IRenderable2D;
@@ -51,6 +63,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private CatanAssetManager catanAssetManager;
 
     private BitmapFont bitmapFont;
+    private btCollisionWorld collisionWorld;
 
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
@@ -63,7 +76,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         nodeGraph = GraphTypeBuilder
             .<Node, Edge> undirected().allowingMultipleEdges(false)
             .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
-    }
+    }   
 
     /**
      * Generiert ein regelmäßiges Sechseck aus Tiles
@@ -151,6 +164,13 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     }
 
     public void loadAssets() {
+        /**
+         * Erst hier die CollissionWorld initialisieren, weil im Unittest Bullet nicht geladen ist
+         */
+        btDefaultCollisionConfiguration defaultCollisionConfiguration = new btDefaultCollisionConfiguration();
+        collisionWorld = new btCollisionWorld(new btCollisionDispatcher(defaultCollisionConfiguration), new btDbvtBroadphase(), defaultCollisionConfiguration);
+    
+
         for(Tile worldTile : mapTiles) {
             Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
             ModelInstance modelInstance = new ModelInstance(worldTileModel);
@@ -165,6 +185,16 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             material.set(FloatAttribute.createShininess(2f));
 
             modelInstances.add(modelInstance);
+
+            // Collission Shape generieren
+            btCollisionShape shape = Bullet.obtainStaticNodeShape(modelInstance.nodes);
+            btCollisionObject collisionObject = new btCollisionObject();
+            collisionObject.setCollisionShape(shape);
+
+            Matrix4 transform = new Matrix4().setToTranslation(worldTile.getWorldPosition());
+            collisionObject.setWorldTransform(transform);
+
+            collisionWorld.addCollisionObject(collisionObject);
         }
 
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;
@@ -240,6 +270,19 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 bitmapFont.draw(spriteBatch, String.valueOf(t.getNumberValue()), screenCoords.x - layout.width / 2, screenCoords.y + layout.height / 2);
             }
         }
+
+
+        /*Ray ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
+
+        Vector3 rayFrom = camera.position;
+        Vector3 rayTo = rayFrom.cpy().add(ray.direction.cpy().scl(1000f)); // lang genug
+
+        ClosestRayResultCallback callback = new ClosestRayResultCallback(rayFrom, rayTo);
+        collisionWorld.rayTest(rayFrom, rayTo, callback);
+
+        if (callback.hasHit()) {
+            System.out.println("Kollision!");
+        }*/
     }
 
     @Override

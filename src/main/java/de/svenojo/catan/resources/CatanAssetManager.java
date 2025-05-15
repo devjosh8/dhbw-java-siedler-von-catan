@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.physics.bullet.Bullet;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.svenojo.catan.core.Globals;
@@ -42,7 +43,6 @@ public class CatanAssetManager {
      * Außnahme: Assets, die erst zur Laufzeit geladen werden sollen
      */
     public void initializeAssets() {
-
         // Modelle für die Map initialisieren
         for(TileType type : TileType.values()) {
             loadModel(type.getFileName());

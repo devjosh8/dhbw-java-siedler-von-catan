@@ -75,7 +75,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     private BuildingCalculator buildingCalculator;
 
-    // TODO: MapGeneration auslagern in einen MapGenerator
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
         this.bitmapFont = null;
@@ -153,7 +152,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             ModelInstance a = modelInstances.get(triangleMeshIndex);
             TileHighlighter.setModelInstanceHighlightTemporarily(a);
             currentlyHighlightedTile = mapTiles.get(triangleMeshIndex);
-            System.out.println(currentlyHighlightedTile.getWorldTileType().toString());
         } else {
             currentlyHighlightedTile = null;
         }

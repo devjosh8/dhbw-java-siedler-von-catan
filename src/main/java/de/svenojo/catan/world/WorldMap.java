@@ -3,6 +3,7 @@ package de.svenojo.catan.world;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
@@ -50,6 +51,7 @@ import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingCity;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
+import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
 import de.svenojo.catan.world.tile.TileMesh;
@@ -60,7 +62,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private List<Tile> mapTiles;
     private ArrayList<ModelInstance> modelInstances;
     private ArrayList<TileMesh> tileMeshes;
-
+    private Tile currentlyHighlightedTile = null; 
 
     private List<Node> nodes;
     private Set<Building> buildings;
@@ -87,93 +89,13 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         nodeGraph = GraphTypeBuilder
             .<Node, Edge> undirected().allowingMultipleEdges(false)
             .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
-    
-        
     }   
 
     /**
-     * Generiert ein regelmäßiges Sechseck aus Tiles
-     * setzt die kartesische Position bei Tiles aus der berechneten axialen Position
+     * Generiert die Karte über die MapGenerator Klasse
      */
     public void generateMap() {
-        int mapRadius = 2;
-
-        for (int q = -mapRadius; q <= mapRadius; q++) {
-            for (int r = Math.max(-mapRadius, -q - mapRadius); r <= Math.min(mapRadius, -q + mapRadius); r++) {
-                AxialVector tilePosition = new AxialVector(q, r);
-                Tile worldTile = new Tile(tilePosition, TileType.values()[new Random().nextInt(TileType.values().length)]);
-                mapTiles.add(worldTile);
-                
-            }
-        }
-
-        generateNodeGraph();
-    }
-
-    /**
-     * Generiert den ungerichteten, ungewichteten Graph für die Nodes, die sich an den
-     * Ecken von den Tiles (Sechseckigen Kartenteilen) befinden
-     */
-    private void generateNodeGraph() {
-        Vector3[] positions = {
-            new Vector3(0, 0, -2),
-            new Vector3((float) Math.sqrt(3), 0, -1),
-            new Vector3((float) Math.sqrt(3), 0, 1),
-            new Vector3(0, 0, 2),
-            new Vector3((float) -Math.sqrt(3), 0, 1),
-            new Vector3((float) -Math.sqrt(3), 0, -1),
-
-            new Vector3(0, 0, -2)
-        };
-
-
-        float nodePositionTolerance = 0.1f;
-        Node lastNode = null;
-        boolean createNewNode = false;
-        int nodesCreatedCounter = 0;
-
-        for(Tile tile : mapTiles) {
-            float tileX = tile.getWorldPosition().x;
-            float tileZ = tile.getWorldPosition().z;
-
-            for(Vector3 offsetPosition : positions) {
-                createNewNode = true;
-                for(Node node : nodes) {
-                    if(     Math.abs(node.getPosition().x - (tileX + offsetPosition.x)) <= nodePositionTolerance 
-                        &&  Math.abs(node.getPosition().z - (tileZ + offsetPosition.z) )<= nodePositionTolerance ) {
-                        createNewNode = false;
-
-                        node.addNeighbourTile(tile);
-                        if(lastNode != null) {
-                            if(! (nodeGraph.containsEdge(node, lastNode)) ) {
-                                nodeGraph.addEdge(node, lastNode);
-                                lastNode = node;
-                                break;
-                            }
-                        }
-                        lastNode = node;
-                    }
-                }
-
-                
-                if(createNewNode) {
-                    nodesCreatedCounter++;
-                    Node currentNode = new Node(new Vector3(tileX + offsetPosition.x, 0, tileZ + offsetPosition.z));
-                    currentNode.setNumber(nodesCreatedCounter);
-                    currentNode.addNeighbourTile(tile);
-
-                    nodes.add(currentNode);
-                    nodeGraph.addVertex(currentNode);
-
-                    if(lastNode != null) {
-                        nodeGraph.addEdge(currentNode, lastNode);
-                    }
-
-                    lastNode = currentNode;
-                }
-            } 
-            lastNode = null;
-        }
+        MapGenerator.generateMap(mapTiles, nodeGraph, nodes);
     }
 
     public void loadAssets() {
@@ -230,6 +152,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         if(raycastHit) {
             ModelInstance a = modelInstances.get(triangleMeshIndex);
             TileHighlighter.setModelInstanceHighlightTemporarily(a);
+            currentlyHighlightedTile = mapTiles.get(triangleMeshIndex);
+            System.out.println(currentlyHighlightedTile.getWorldTileType().toString());
+        } else {
+            currentlyHighlightedTile = null;
         }
         
         modelBatch.render(modelInstances, environment);
@@ -265,4 +191,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     public void dispose() {}
 
+    /**
+     * @return Gibt das Tile zurück, das aktuell unter der Maus ist
+     */
+    public Optional<Tile> getCurrentlyHighlightedTile() {
+        return currentlyHighlightedTile == null ? Optional.empty() : Optional.of(currentlyHighlightedTile);
+    }
 }

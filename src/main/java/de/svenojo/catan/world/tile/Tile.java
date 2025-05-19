@@ -2,12 +2,7 @@ package de.svenojo.catan.world.tile;
 
 import java.util.Random;
 
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
-import com.badlogic.gdx.math.collision.Ray;
 
 import de.svenojo.catan.math.AxialVector;
 

@@ -109,12 +109,14 @@ public class GameScreen implements Screen {
         if(!assetsLoading) {
             worldMap.render2D(spriteBatch, environment, perspectiveCamera);
         } 
+
         spriteBatch.end();
     }
 
     @Override
     public void dispose() {
         modelBatch.dispose();
+        worldMap.dispose();
     }
 
     @Override

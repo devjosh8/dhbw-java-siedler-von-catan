@@ -2,7 +2,6 @@ package de.svenojo.catan;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.glutils.HdpiMode;
-import com.badlogic.gdx.physics.bullet.Bullet;
 
 import de.svenojo.catan.core.Globals;
 import de.svenojo.catan.core.CatanGame;
@@ -10,8 +9,6 @@ import de.svenojo.catan.core.CatanGame;
 public class DesktopLauncher {
 
     public static void main(String[] args) {
-        Bullet.init();
-
         Lwjgl3ApplicationConfiguration configuration = new Lwjgl3ApplicationConfiguration();
         configuration.setIdleFPS(Globals.FPS);
         configuration.useVsync(Globals.USE_VSYNC);

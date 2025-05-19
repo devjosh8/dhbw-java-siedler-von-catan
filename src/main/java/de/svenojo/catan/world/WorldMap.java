@@ -12,10 +12,12 @@ import org.jgrapht.graph.builder.GraphTypeBuilder;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -24,23 +26,21 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.physics.bullet.Bullet;
-import com.badlogic.gdx.physics.bullet.collision.ClosestRayResultCallback;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionDispatcher;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionObject;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionShape;
-import com.badlogic.gdx.physics.bullet.collision.btCollisionWorld;
-import com.badlogic.gdx.physics.bullet.collision.btDbvtBroadphase;
-import com.badlogic.gdx.physics.bullet.collision.btDefaultCollisionConfiguration;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
 import de.svenojo.catan.math.AxialVector;
+import de.svenojo.catan.math.Triangle;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.building.Building;
@@ -50,32 +50,41 @@ import de.svenojo.catan.world.building.buildings.BuildingCity;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 import de.svenojo.catan.world.tile.Tile;
+import de.svenojo.catan.world.tile.TileHighlighter;
+import de.svenojo.catan.world.tile.TileMesh;
 import de.svenojo.catan.world.tile.TileType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     
     private List<Tile> mapTiles;
-    private Set<ModelInstance> modelInstances;
+    private ArrayList<ModelInstance> modelInstances;
+    private ArrayList<TileMesh> tileMeshes;
+
+
     private List<Node> nodes;
     private Set<Building> buildings;
-
     private Graph<Node, Edge> nodeGraph;
+
+
     private CatanAssetManager catanAssetManager;
 
     private BitmapFont bitmapFont;
-    private btCollisionWorld collisionWorld;
 
+    // TODO: MapGeneration auslagern in einen MapGenerator
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
         this.bitmapFont = null;
         mapTiles = new ArrayList<>();
-        modelInstances = new HashSet<>();
+        modelInstances = new ArrayList<>();
+        tileMeshes = new ArrayList<>();
         nodes = new ArrayList<>();
         buildings = new HashSet<>();
 
         nodeGraph = GraphTypeBuilder
             .<Node, Edge> undirected().allowingMultipleEdges(false)
             .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
+    
+        
     }   
 
     /**
@@ -164,12 +173,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     }
 
     public void loadAssets() {
-        /**
-         * Erst hier die CollissionWorld initialisieren, weil im Unittest Bullet nicht geladen ist
-         */
-        btDefaultCollisionConfiguration defaultCollisionConfiguration = new btDefaultCollisionConfiguration();
-        collisionWorld = new btCollisionWorld(new btCollisionDispatcher(defaultCollisionConfiguration), new btDbvtBroadphase(), defaultCollisionConfiguration);
-    
 
         for(Tile worldTile : mapTiles) {
             Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
@@ -186,15 +189,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
             modelInstances.add(modelInstance);
 
-            // Collission Shape generieren
-            btCollisionShape shape = Bullet.obtainStaticNodeShape(modelInstance.nodes);
-            btCollisionObject collisionObject = new btCollisionObject();
-            collisionObject.setCollisionShape(shape);
+            TileMesh tileMesh = new TileMesh();
+            tileMesh.setHexagonTriangles(worldTile.getWorldPosition(), Tile.WORLD_TILE_DISTANCE);
+            tileMeshes.add(tileMesh);
 
-            Matrix4 transform = new Matrix4().setToTranslation(worldTile.getWorldPosition());
-            collisionObject.setWorldTransform(transform);
-
-            collisionWorld.addCollisionObject(collisionObject);
         }
 
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;
@@ -253,7 +251,28 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
+
+        Ray ray = modelBatch.getCamera().getPickRay(Gdx.input.getX(), Gdx.input.getY());
+
+        boolean raycastHit = false;
+        int triangleMeshIndex = 0;
+        for(TileMesh currentTileMesh : tileMeshes) {
+            
+            Vector3 hitpoint = Vector3.Zero;
+            if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
+                raycastHit = true;
+                break;
+            }
+            triangleMeshIndex++;
+        }
+
+        if(raycastHit) {
+            ModelInstance a = modelInstances.get(triangleMeshIndex);
+            TileHighlighter.setModelInstanceHighlightTemporarily(a);
+        }
+        
         modelBatch.render(modelInstances, environment);
+
     }
 
     @Override
@@ -270,19 +289,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 bitmapFont.draw(spriteBatch, String.valueOf(t.getNumberValue()), screenCoords.x - layout.width / 2, screenCoords.y + layout.height / 2);
             }
         }
-
-
-        /*Ray ray = camera.getPickRay(Gdx.input.getX(), Gdx.input.getY());
-
-        Vector3 rayFrom = camera.position;
-        Vector3 rayTo = rayFrom.cpy().add(ray.direction.cpy().scl(1000f)); // lang genug
-
-        ClosestRayResultCallback callback = new ClosestRayResultCallback(rayFrom, rayTo);
-        collisionWorld.rayTest(rayFrom, rayTo, callback);
-
-        if (callback.hasHit()) {
-            System.out.println("Kollision!");
-        }*/
     }
 
     @Override
@@ -295,4 +301,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     public Set<Building> getBuildings() {
         return buildings;
     }
+
+    public void dispose() {}
+
 }

@@ -26,36 +26,22 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Intersector;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.math.collision.BoundingBox;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Timer;
 
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
-import de.svenojo.catan.math.AxialVector;
-import de.svenojo.catan.math.Triangle;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingCalculator;
-import de.svenojo.catan.world.building.BuildingType;
-import de.svenojo.catan.world.building.NodeBuilding;
-import de.svenojo.catan.world.building.buildings.BuildingCity;
-import de.svenojo.catan.world.building.buildings.BuildingSettlement;
-import de.svenojo.catan.world.building.buildings.BuildingStreet;
 import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
 import de.svenojo.catan.world.tile.TileMesh;
 import de.svenojo.catan.world.tile.TileType;
+import de.svenojo.catan.world.util.HighlightingType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     
@@ -74,6 +60,8 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private BitmapFont bitmapFont;
 
     private BuildingCalculator buildingCalculator;
+
+    private HighlightingType highlightingType;
 
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
@@ -131,32 +119,41 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         }
     }
 
-    @Override
-    public void render(ModelBatch modelBatch, Environment environment) {
+    private void highlightObjectUnderMouse(ModelBatch modelBatch, Environment environment) {
+        if(getHighlightingType() == HighlightingType.NODE)return;
 
         Ray ray = modelBatch.getCamera().getPickRay(Gdx.input.getX(), Gdx.input.getY());
 
         boolean raycastHit = false;
-        int triangleMeshIndex = 0;
-        for(TileMesh currentTileMesh : tileMeshes) {
-            
-            Vector3 hitpoint = Vector3.Zero;
-            if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
-                raycastHit = true;
-                break;
-            }
-            triangleMeshIndex++;
-        }
 
-        if(raycastHit) {
-            ModelInstance a = modelInstances.get(triangleMeshIndex);
-            TileHighlighter.setModelInstanceHighlightTemporarily(a);
-            currentlyHighlightedTile = mapTiles.get(triangleMeshIndex);
-        } else {
-            currentlyHighlightedTile = null;
+        if(getHighlightingType() == HighlightingType.TILE) {
+            int raycastHitMeshIndex = 0;
+            for(TileMesh currentTileMesh : tileMeshes) {
+                
+                Vector3 hitpoint = Vector3.Zero;
+                if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
+                    raycastHit = true;
+                    break;
+                }
+                raycastHitMeshIndex++;
+            }
+
+            if(raycastHit) {
+                ModelInstance a = modelInstances.get(raycastHitMeshIndex);
+                TileHighlighter.setModelInstanceHighlightTemporarily(a);
+                currentlyHighlightedTile = mapTiles.get(raycastHitMeshIndex);
+            } else {
+                currentlyHighlightedTile = null;
+            }
+            
+            modelBatch.render(modelInstances, environment);
         }
-        
-        modelBatch.render(modelInstances, environment);
+    }
+
+    @Override
+    public void render(ModelBatch modelBatch, Environment environment) {
+
+        highlightObjectUnderMouse(modelBatch, environment);
 
     }
 
@@ -194,5 +191,13 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      */
     public Optional<Tile> getCurrentlyHighlightedTile() {
         return currentlyHighlightedTile == null ? Optional.empty() : Optional.of(currentlyHighlightedTile);
+    }
+
+    public void setHighlightingType(HighlightingType highlightingType) {
+        this.highlightingType = highlightingType;
+    }
+
+    public HighlightingType getHighlightingType() {
+        return highlightingType;
     }
 }

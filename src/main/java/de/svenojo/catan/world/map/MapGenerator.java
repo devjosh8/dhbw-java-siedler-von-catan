@@ -69,7 +69,7 @@ public class MapGenerator {
                         node.addNeighbourTile(tile);
                         if(lastNode != null) {
                             if(! (nodeGraph.containsEdge(node, lastNode)) ) {
-                                nodeGraph.addEdge(node, lastNode);
+                                nodeGraph.addEdge(node, lastNode, new Edge(node, lastNode));
                                 lastNode = node;
                                 break;
                             }
@@ -89,7 +89,7 @@ public class MapGenerator {
                     nodeGraph.addVertex(currentNode);
 
                     if(lastNode != null) {
-                        nodeGraph.addEdge(currentNode, lastNode);
+                        nodeGraph.addEdge(currentNode, lastNode, new Edge(lastNode, currentNode));
                     }
 
                     lastNode = currentNode;

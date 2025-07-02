@@ -1,6 +1,5 @@
 package de.svenojo.catan.world;
 
-import java.lang.foreign.Linker.Option;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -49,10 +48,12 @@ import de.svenojo.catan.world.util.HighlightingType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     
+    /*
+     * Alle wichtigen Datenstrukturen für die Karte
+     */
     private List<Tile> mapTiles;
     private ArrayList<ModelInstance> modelInstances;
     private ArrayList<TileMesh> tileMeshes;
-    private Tile currentlyHighlightedTile = null; 
 
     private List<Node> nodes;
     private Set<Building> buildings;
@@ -65,7 +66,18 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     private BuildingCalculator buildingCalculator;
 
+    /**
+     *  für die Kollissionsberechnung benötigte Hilfsvariablen 
+     */
     private HighlightingType highlightingType;
+
+    private Tile currentlyHighlightedTile = null; 
+
+    private Node currentlyHighlightedNode;
+    private ModelInstance highlightedNodeModelInstance;
+
+    private Edge currentlyHighlightedEdge;
+    private ModelInstance highlightedEdgeModelInstance;
 
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
@@ -81,7 +93,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             .<Node, Edge> undirected().allowingMultipleEdges(false)
             .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
 
-        highlightingType = HighlightingType.NODE;
+        highlightingType = HighlightingType.NONE;
     }   
 
     /**
@@ -126,9 +138,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     }
 
 
-    private Node currentlyHighlightedNode;
-    private ModelInstance highlightedNodeModelInstance;
-
     private void highlightObjectUnderMouse(ModelBatch modelBatch, Environment environment) {
         if(getHighlightingType() == HighlightingType.NONE)return;
 
@@ -166,18 +175,15 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 if(Intersector.intersectRaySphere(ray, node.getPosition().cpy().add(0, 0.2f, 0), 0.5f, hitpoint)) {
                     if(node != currentlyHighlightedNode) {
                         currentlyHighlightedNode = node;
-                        // ModelInstance neu spawnen
 
                         Model sphereModel = new ModelBuilder().createSphere(
-                            1f, 1f, 1f,            // Abmessungen
-                            10, 10,                // Segmente
+                            1f, 1f, 1f, 
+                            10, 10,
                             new Material(
-                                    // zartes Rot, 35 % Deckkraft
                                     ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
-                                    // Blending aktivieren (SRC_ALPHA / ONE_MINUS_SRC_ALPHA) und denselben Alpha-Wert setzen
                                     new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
                             ),
-                            Usage.Position | Usage.Normal   // ColorPacked ist hier entbehrlich
+                            Usage.Position | Usage.Normal  
                         );
 
                         highlightedNodeModelInstance = new ModelInstance(sphereModel);
@@ -189,6 +195,23 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 
             }
             currentlyHighlightedNode = null;
+        } else if(getHighlightingType() == HighlightingType.EDGE) {
+            for(Edge edge : getNodeGraph().edgeSet()) {    
+                if(edge.getBoundingCylinder().intersects(ray)) {
+                    if(edge != currentlyHighlightedEdge) {
+                        currentlyHighlightedEdge = edge;
+
+                        highlightedEdgeModelInstance = edge.getBoundingCylinder().toModelInstance(new ModelBuilder(), 
+                            new Material(
+                                    ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
+                                    new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
+                            ));
+                    }
+                    modelBatch.render(highlightedEdgeModelInstance);
+                    return;
+                }   
+             }
+            currentlyHighlightedEdge = null;
         }
     }
 

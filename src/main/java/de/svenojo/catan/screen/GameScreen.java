@@ -12,7 +12,6 @@ import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
-import com.badlogic.gdx.graphics.g3d.model.Node;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 
 import de.svenojo.catan.core.CatanGame;
@@ -22,7 +21,6 @@ import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
-import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
 public class GameScreen implements Screen {
     /**
@@ -111,12 +109,14 @@ public class GameScreen implements Screen {
         if(!assetsLoading) {
             worldMap.render2D(spriteBatch, environment, perspectiveCamera);
         } 
+
         spriteBatch.end();
     }
 
     @Override
     public void dispose() {
         modelBatch.dispose();
+        worldMap.dispose();
     }
 
     @Override

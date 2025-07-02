@@ -49,6 +49,7 @@
             <classifier>natives-desktop</classifier>
             <scope>runtime</scope>
         </dependency>
+        
         <!-- Testmodul für Unittests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

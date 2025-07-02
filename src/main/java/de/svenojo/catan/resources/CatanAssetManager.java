@@ -42,7 +42,6 @@ public class CatanAssetManager {
      * Außnahme: Assets, die erst zur Laufzeit geladen werden sollen
      */
     public void initializeAssets() {
-
         // Modelle für die Map initialisieren
         for(TileType type : TileType.values()) {
             loadModel(type.getFileName());

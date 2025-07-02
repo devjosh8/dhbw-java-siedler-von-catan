@@ -3,14 +3,16 @@ package de.svenojo.catan.world;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
+import java.util.Optional;
 import java.util.Set;
 
 import org.jgrapht.Graph;
 import org.jgrapht.graph.builder.GraphTypeBuilder;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -20,137 +22,90 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.collision.Ray;
 
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
-import de.svenojo.catan.math.AxialVector;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.building.Building;
-import de.svenojo.catan.world.building.BuildingType;
-import de.svenojo.catan.world.building.NodeBuilding;
-import de.svenojo.catan.world.building.buildings.BuildingCity;
-import de.svenojo.catan.world.building.buildings.BuildingSettlement;
-import de.svenojo.catan.world.building.buildings.BuildingStreet;
+import de.svenojo.catan.world.building.BuildingCalculator;
+import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
-import de.svenojo.catan.world.tile.TileType;
+import de.svenojo.catan.world.tile.TileHighlighter;
+import de.svenojo.catan.world.tile.TileMesh;
+import de.svenojo.catan.world.util.HighlightingType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     
+    /*
+     * Alle wichtigen Datenstrukturen für die Karte
+     */
     private List<Tile> mapTiles;
-    private Set<ModelInstance> modelInstances;
+    private ArrayList<ModelInstance> modelInstances;
+    private ArrayList<TileMesh> tileMeshes;
+
     private List<Node> nodes;
     private Set<Building> buildings;
-
     private Graph<Node, Edge> nodeGraph;
+
+
     private CatanAssetManager catanAssetManager;
 
     private BitmapFont bitmapFont;
+
+    private BuildingCalculator buildingCalculator;
+
+    /**
+     *  für die Kollissionsberechnung benötigte Hilfsvariablen 
+     */
+
+    // Diese Variable kann verwendet werden, um zu setzen, welche Art von Kollissionen abgefangen werden soll
+    // Ist diese Variable auf NONE gesetzt, werden keine Kollissionen berechnet und es kommen auch keine an! (default ist NONE!)
+    // Für Annahme der Kollissionen die Getter unten verwenden
+    private HighlightingType highlightingType;
+
+    private Tile currentlyHighlightedTile = null; 
+
+    private Node currentlyHighlightedNode;
+    private ModelInstance highlightedNodeModelInstance;
+
+    private Edge currentlyHighlightedEdge;
+    private ModelInstance highlightedEdgeModelInstance;
 
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
         this.bitmapFont = null;
         mapTiles = new ArrayList<>();
-        modelInstances = new HashSet<>();
+        modelInstances = new ArrayList<>();
+        tileMeshes = new ArrayList<>();
         nodes = new ArrayList<>();
         buildings = new HashSet<>();
+        this.buildingCalculator = new BuildingCalculator(catanAssetManager);
 
         nodeGraph = GraphTypeBuilder
             .<Node, Edge> undirected().allowingMultipleEdges(false)
             .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
-    }
+
+        highlightingType = HighlightingType.NONE;
+    }   
 
     /**
-     * Generiert ein regelmäßiges Sechseck aus Tiles
-     * setzt die kartesische Position bei Tiles aus der berechneten axialen Position
+     * Generiert die Karte über die MapGenerator Klasse
      */
     public void generateMap() {
-        int mapRadius = 2;
-
-        for (int q = -mapRadius; q <= mapRadius; q++) {
-            for (int r = Math.max(-mapRadius, -q - mapRadius); r <= Math.min(mapRadius, -q + mapRadius); r++) {
-                AxialVector tilePosition = new AxialVector(q, r);
-                Tile worldTile = new Tile(tilePosition, TileType.values()[new Random().nextInt(TileType.values().length)]);
-                mapTiles.add(worldTile);
-                
-            }
-        }
-
-        generateNodeGraph();
-    }
-
-    /**
-     * Generiert den ungerichteten, ungewichteten Graph für die Nodes, die sich an den
-     * Ecken von den Tiles (Sechseckigen Kartenteilen) befinden
-     */
-    private void generateNodeGraph() {
-        Vector3[] positions = {
-            new Vector3(0, 0, -2),
-            new Vector3((float) Math.sqrt(3), 0, -1),
-            new Vector3((float) Math.sqrt(3), 0, 1),
-            new Vector3(0, 0, 2),
-            new Vector3((float) -Math.sqrt(3), 0, 1),
-            new Vector3((float) -Math.sqrt(3), 0, -1),
-
-            new Vector3(0, 0, -2)
-        };
-
-
-        float nodePositionTolerance = 0.1f;
-        Node lastNode = null;
-        boolean createNewNode = false;
-        int nodesCreatedCounter = 0;
-
-        for(Tile tile : mapTiles) {
-            float tileX = tile.getWorldPosition().x;
-            float tileZ = tile.getWorldPosition().z;
-
-            for(Vector3 offsetPosition : positions) {
-                createNewNode = true;
-                for(Node node : nodes) {
-                    if(     Math.abs(node.getPosition().x - (tileX + offsetPosition.x)) <= nodePositionTolerance 
-                        &&  Math.abs(node.getPosition().z - (tileZ + offsetPosition.z) )<= nodePositionTolerance ) {
-                        createNewNode = false;
-
-                        node.addNeighbourTile(tile);
-                        if(lastNode != null) {
-                            if(! (nodeGraph.containsEdge(node, lastNode)) ) {
-                                nodeGraph.addEdge(node, lastNode);
-                                lastNode = node;
-                                break;
-                            }
-                        }
-                        lastNode = node;
-                    }
-                }
-
-                
-                if(createNewNode) {
-                    nodesCreatedCounter++;
-                    Node currentNode = new Node(new Vector3(tileX + offsetPosition.x, 0, tileZ + offsetPosition.z));
-                    currentNode.setNumber(nodesCreatedCounter);
-                    currentNode.addNeighbourTile(tile);
-
-                    nodes.add(currentNode);
-                    nodeGraph.addVertex(currentNode);
-
-                    if(lastNode != null) {
-                        nodeGraph.addEdge(currentNode, lastNode);
-                    }
-
-                    lastNode = currentNode;
-                }
-            } 
-            lastNode = null;
-        }
+        MapGenerator.generateMap(mapTiles, nodeGraph, nodes);
     }
 
     public void loadAssets() {
+
         for(Tile worldTile : mapTiles) {
             Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
             ModelInstance modelInstance = new ModelInstance(worldTileModel);
@@ -165,67 +120,120 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             material.set(FloatAttribute.createShininess(2f));
 
             modelInstances.add(modelInstance);
+
+            TileMesh tileMesh = new TileMesh();
+            tileMesh.setHexagonTriangles(worldTile.getWorldPosition(), Tile.WORLD_TILE_DISTANCE);
+            tileMeshes.add(tileMesh);
+
         }
 
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;
     }
 
     public void placeBuilding(Player player, Building building) {
-        if(building.getBuildingType() == BuildingType.STREET && building instanceof BuildingStreet) {
+        ModelInstance modelInstance = buildingCalculator.calculateBuildingModelInstance(player, building, nodeGraph);
+        if(modelInstance != null) {
             buildings.add(building);
-            
-            ModelInstance instance = new ModelInstance(catanAssetManager.getModel(building.getBuildingType().getFileName()));
-            
+            modelInstances.add(modelInstance);
+        }
+    }
 
-            BuildingStreet buildingStreet = (BuildingStreet) building;
 
-            Vector3 position = new Vector3();
-            Node source = nodeGraph.getEdgeSource(buildingStreet.getPosition());
-            Node target = nodeGraph.getEdgeTarget(buildingStreet.getPosition());
+    private void highlightObjectUnderMouse(ModelBatch modelBatch, Environment environment) {
 
-            float delta_x = target.getPosition().x - source.getPosition().x;
-            float delta_z = target.getPosition().z - source.getPosition().z;
-            
-            double theta = Math.tan((double) delta_x / delta_z) * 9.2d; //??? Warum mal 10?? funktioniert aber ._. wtf
+        Ray ray = modelBatch.getCamera().getPickRay(Gdx.input.getX(), Gdx.input.getY());
 
-            position.x = source.getPosition().x + (delta_x) / 2;
-            position.z = source.getPosition().z + (delta_z) / 2;
-            position.y = 0.1f;
-            instance.transform.setToTranslation(position);
-            instance.transform.rotate(new Vector3(0, 1.0f, 0f), (float) (-theta));
-            instance.transform.scale(0.011f, 0.011f, 0.014f);
-            modelInstances.add(instance);
-        } else if(building instanceof NodeBuilding) {
-            buildings.add(building);
+        boolean raycastHit = false;
 
-            ModelInstance instance = new ModelInstance(catanAssetManager.getModel(building.getBuildingType().getFileName()));
+        switch(getHighlightingType()) {
+            case NONE:
+                return;
+            case TILE: {
+                int raycastHitMeshIndex = 0;
+                for(TileMesh currentTileMesh : tileMeshes) {
+                    
+                    Vector3 hitpoint = Vector3.Zero;
+                    if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
+                        raycastHit = true;
+                        break;
+                    }
+                    raycastHitMeshIndex++;
+                }
 
-            Vector3 position = new Vector3();
-            
-            NodeBuilding nodeBuilding = (NodeBuilding) building;
+                if(raycastHit) {
+                    ModelInstance a = modelInstances.get(raycastHitMeshIndex);
+                    TileHighlighter.setModelInstanceHighlightTemporarily(a);
+                    currentlyHighlightedTile = mapTiles.get(raycastHitMeshIndex);
+                } else {
+                    currentlyHighlightedTile = null;
+                }
+                
+                modelBatch.render(modelInstances, environment);
+                break;
+            }
 
-            position.x = nodeBuilding.getPosition().getPosition().x;
-            position.z = nodeBuilding.getPosition().getPosition().z;
+            case NODE: {
+                for(Node node : getNodeGraph().vertexSet()) {
 
-            if(building instanceof BuildingSettlement) {
-                position.y = 0.16f;
-                instance.transform.setToTranslation(position);
-                instance.transform.rotate(new Vector3(0, 1.0f, 0f), (float) new Random().nextFloat() * 30.0f);
-                instance.transform.scale(0.009f, 0.009f, 0.009f);
-                modelInstances.add(instance);
-            } else if(building instanceof BuildingCity) {
-                /**
-                 * Stadt platzieren
-                 */
+                    Vector3 hitpoint = Vector3.Zero;
+                    if(Intersector.intersectRaySphere(ray, node.getPosition().cpy().add(0, 0.2f, 0), 0.5f, hitpoint)) {
+                        if(node != currentlyHighlightedNode) {
+                            currentlyHighlightedNode = node;
+
+                            Model sphereModel = new ModelBuilder().createSphere(
+                                1f, 1f, 1f, 
+                                10, 10,
+                                new Material(
+                                        ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
+                                        new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
+                                ),
+                                Usage.Position | Usage.Normal  
+                            );
+
+                            highlightedNodeModelInstance = new ModelInstance(sphereModel);
+                            highlightedNodeModelInstance.transform.setToTranslation(node.getPosition().cpy().add(0, 0.2f ,0));
+                        }
+                        modelBatch.render(highlightedNodeModelInstance);
+                        return;
+                    }
+                    
+                }
+                currentlyHighlightedNode = null;
+                break;
+            }
+
+            case EDGE: {
+                for(Edge edge : getNodeGraph().edgeSet()) {    
+                    if(edge.getBoundingCylinder().intersects(ray)) {
+                        if(edge != currentlyHighlightedEdge) {
+                            currentlyHighlightedEdge = edge;
+
+                            highlightedEdgeModelInstance = edge.getBoundingCylinder().toModelInstance(new ModelBuilder(), 
+                                new Material(
+                                        ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
+                                        new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
+                                ));
+                        }
+                        modelBatch.render(highlightedEdgeModelInstance);
+                        return;
+                    }   
+                }
+                currentlyHighlightedEdge = null;
+                break;
             }
         }
     }
 
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
+
+        highlightObjectUnderMouse(modelBatch, environment);
         modelBatch.render(modelInstances, environment);
     }
 
+    /**
+     * 2D Rendering - hier werden gerade nur die Zahlen der Tiles gerendert
+     */
     @Override
     public void render2D(SpriteBatch spriteBatch, Environment environment, Camera camera) {
         for(Tile t : mapTiles) {
@@ -252,4 +260,38 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     public Set<Building> getBuildings() {
         return buildings;
     }
+
+    public void dispose() {}
+
+    public void setHighlightingType(HighlightingType highlightingType) {
+        this.highlightingType = highlightingType;
+    }
+
+    public HighlightingType getHighlightingType() {
+        return highlightingType;
+    }
+
+    /**
+     * @return Gibt das Tile zurück, das aktuell unter der Maus ist
+     */
+    public Optional<Tile> getCurrentlyHighlightedTile() {
+        return currentlyHighlightedTile == null ? Optional.empty() : Optional.of(currentlyHighlightedTile);
+    }
+
+    /**
+     * @return Gibt die Node (Ecke) zurück, die aktuell unter der Maus ist
+     * ist gerade keine Ecke unter der Maus, so wird ein leeres Optional zurückgegeben
+     */
+    public Optional<Node> getCurrentlyHighlightedNode() {
+        return currentlyHighlightedNode == null ? Optional.empty() : Optional.of(currentlyHighlightedNode);
+    }
+
+     /**
+     * @return Gibt die Node (Ecke) zurück, die aktuell unter der Maus ist
+     * ist gerade keine Ecke unter der Maus, so wird ein leeres Optional zurückgegeben
+     */
+    public Optional<Edge> getCurrentlyHighlightedEdge() {
+        return currentlyHighlightedEdge == null ? Optional.empty() : Optional.of(currentlyHighlightedEdge);
+    }
+
 }

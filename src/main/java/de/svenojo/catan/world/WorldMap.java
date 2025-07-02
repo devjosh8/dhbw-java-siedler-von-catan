@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
 import org.jgrapht.Graph;
@@ -18,7 +17,6 @@ import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g3d.Attribute;
 import com.badlogic.gdx.graphics.g3d.Environment;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -43,7 +41,6 @@ import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
 import de.svenojo.catan.world.tile.TileMesh;
-import de.svenojo.catan.world.tile.TileType;
 import de.svenojo.catan.world.util.HighlightingType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
@@ -69,6 +66,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     /**
      *  für die Kollissionsberechnung benötigte Hilfsvariablen 
      */
+
+    // Diese Variable kann verwendet werden, um zu setzen, welche Art von Kollissionen abgefangen werden soll
+    // Ist diese Variable auf NONE gesetzt, werden keine Kollissionen berechnet und es kommen auch keine an! (default ist NONE!)
+    // Für Annahme der Kollissionen die Getter unten verwenden
     private HighlightingType highlightingType;
 
     private Tile currentlyHighlightedTile = null; 
@@ -139,79 +140,87 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
 
     private void highlightObjectUnderMouse(ModelBatch modelBatch, Environment environment) {
-        if(getHighlightingType() == HighlightingType.NONE)return;
 
         Ray ray = modelBatch.getCamera().getPickRay(Gdx.input.getX(), Gdx.input.getY());
 
         boolean raycastHit = false;
 
-        if(getHighlightingType() == HighlightingType.TILE) {
-            int raycastHitMeshIndex = 0;
-            for(TileMesh currentTileMesh : tileMeshes) {
-                
-                Vector3 hitpoint = Vector3.Zero;
-                if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
-                    raycastHit = true;
-                    break;
-                }
-                raycastHitMeshIndex++;
-            }
-
-            if(raycastHit) {
-                ModelInstance a = modelInstances.get(raycastHitMeshIndex);
-                TileHighlighter.setModelInstanceHighlightTemporarily(a);
-                currentlyHighlightedTile = mapTiles.get(raycastHitMeshIndex);
-            } else {
-                currentlyHighlightedTile = null;
-            }
-            
-            modelBatch.render(modelInstances, environment);
-        } else if(getHighlightingType() == HighlightingType.NODE) {
-            
-            
-            for(Node node : getNodeGraph().vertexSet()) {
-
-                Vector3 hitpoint = Vector3.Zero;
-                if(Intersector.intersectRaySphere(ray, node.getPosition().cpy().add(0, 0.2f, 0), 0.5f, hitpoint)) {
-                    if(node != currentlyHighlightedNode) {
-                        currentlyHighlightedNode = node;
-
-                        Model sphereModel = new ModelBuilder().createSphere(
-                            1f, 1f, 1f, 
-                            10, 10,
-                            new Material(
-                                    ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
-                                    new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
-                            ),
-                            Usage.Position | Usage.Normal  
-                        );
-
-                        highlightedNodeModelInstance = new ModelInstance(sphereModel);
-                        highlightedNodeModelInstance.transform.setToTranslation(node.getPosition().cpy().add(0, 0.2f ,0));
+        switch(getHighlightingType()) {
+            case NONE:
+                return;
+            case TILE: {
+                int raycastHitMeshIndex = 0;
+                for(TileMesh currentTileMesh : tileMeshes) {
+                    
+                    Vector3 hitpoint = Vector3.Zero;
+                    if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
+                        raycastHit = true;
+                        break;
                     }
-                    modelBatch.render(highlightedNodeModelInstance);
-                    return;
+                    raycastHitMeshIndex++;
+                }
+
+                if(raycastHit) {
+                    ModelInstance a = modelInstances.get(raycastHitMeshIndex);
+                    TileHighlighter.setModelInstanceHighlightTemporarily(a);
+                    currentlyHighlightedTile = mapTiles.get(raycastHitMeshIndex);
+                } else {
+                    currentlyHighlightedTile = null;
                 }
                 
+                modelBatch.render(modelInstances, environment);
+                break;
             }
-            currentlyHighlightedNode = null;
-        } else if(getHighlightingType() == HighlightingType.EDGE) {
-            for(Edge edge : getNodeGraph().edgeSet()) {    
-                if(edge.getBoundingCylinder().intersects(ray)) {
-                    if(edge != currentlyHighlightedEdge) {
-                        currentlyHighlightedEdge = edge;
 
-                        highlightedEdgeModelInstance = edge.getBoundingCylinder().toModelInstance(new ModelBuilder(), 
-                            new Material(
-                                    ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
-                                    new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
-                            ));
+            case NODE: {
+                for(Node node : getNodeGraph().vertexSet()) {
+
+                    Vector3 hitpoint = Vector3.Zero;
+                    if(Intersector.intersectRaySphere(ray, node.getPosition().cpy().add(0, 0.2f, 0), 0.5f, hitpoint)) {
+                        if(node != currentlyHighlightedNode) {
+                            currentlyHighlightedNode = node;
+
+                            Model sphereModel = new ModelBuilder().createSphere(
+                                1f, 1f, 1f, 
+                                10, 10,
+                                new Material(
+                                        ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
+                                        new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
+                                ),
+                                Usage.Position | Usage.Normal  
+                            );
+
+                            highlightedNodeModelInstance = new ModelInstance(sphereModel);
+                            highlightedNodeModelInstance.transform.setToTranslation(node.getPosition().cpy().add(0, 0.2f ,0));
+                        }
+                        modelBatch.render(highlightedNodeModelInstance);
+                        return;
                     }
-                    modelBatch.render(highlightedEdgeModelInstance);
-                    return;
-                }   
-             }
-            currentlyHighlightedEdge = null;
+                    
+                }
+                currentlyHighlightedNode = null;
+                break;
+            }
+
+            case EDGE: {
+                for(Edge edge : getNodeGraph().edgeSet()) {    
+                    if(edge.getBoundingCylinder().intersects(ray)) {
+                        if(edge != currentlyHighlightedEdge) {
+                            currentlyHighlightedEdge = edge;
+
+                            highlightedEdgeModelInstance = edge.getBoundingCylinder().toModelInstance(new ModelBuilder(), 
+                                new Material(
+                                        ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
+                                        new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
+                                ));
+                        }
+                        modelBatch.render(highlightedEdgeModelInstance);
+                        return;
+                    }   
+                }
+                currentlyHighlightedEdge = null;
+                break;
+            }
         }
     }
 
@@ -222,6 +231,9 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         modelBatch.render(modelInstances, environment);
     }
 
+    /**
+     * 2D Rendering - hier werden gerade nur die Zahlen der Tiles gerendert
+     */
     @Override
     public void render2D(SpriteBatch spriteBatch, Environment environment, Camera camera) {
         for(Tile t : mapTiles) {

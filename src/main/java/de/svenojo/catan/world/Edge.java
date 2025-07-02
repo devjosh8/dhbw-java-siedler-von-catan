@@ -2,8 +2,6 @@ package de.svenojo.catan.world;
 
 import java.util.Optional;
 
-import com.badlogic.gdx.math.collision.BoundingBox;
-
 import de.svenojo.catan.math.BoundingCylinder;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 

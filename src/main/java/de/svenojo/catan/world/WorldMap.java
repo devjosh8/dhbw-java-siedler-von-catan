@@ -1,5 +1,6 @@
 package de.svenojo.catan.world;
 
+import java.lang.foreign.Linker.Option;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -24,8 +25,11 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
 
@@ -76,6 +80,8 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         nodeGraph = GraphTypeBuilder
             .<Node, Edge> undirected().allowingMultipleEdges(false)
             .allowingSelfLoops(false).edgeClass(Edge.class).weighted(false).buildGraph();
+
+        highlightingType = HighlightingType.NODE;
     }   
 
     /**
@@ -119,8 +125,12 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         }
     }
 
+
+    private Node currentlyHighlightedNode;
+    private ModelInstance highlightedNodeModelInstance;
+
     private void highlightObjectUnderMouse(ModelBatch modelBatch, Environment environment) {
-        if(getHighlightingType() == HighlightingType.NODE)return;
+        if(getHighlightingType() == HighlightingType.NONE)return;
 
         Ray ray = modelBatch.getCamera().getPickRay(Gdx.input.getX(), Gdx.input.getY());
 
@@ -147,6 +157,38 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             }
             
             modelBatch.render(modelInstances, environment);
+        } else if(getHighlightingType() == HighlightingType.NODE) {
+            
+            
+            for(Node node : getNodeGraph().vertexSet()) {
+
+                Vector3 hitpoint = Vector3.Zero;
+                if(Intersector.intersectRaySphere(ray, node.getPosition().cpy().add(0, 0.2f, 0), 0.5f, hitpoint)) {
+                    if(node != currentlyHighlightedNode) {
+                        currentlyHighlightedNode = node;
+                        // ModelInstance neu spawnen
+
+                        Model sphereModel = new ModelBuilder().createSphere(
+                            1f, 1f, 1f,            // Abmessungen
+                            10, 10,                // Segmente
+                            new Material(
+                                    // zartes Rot, 35 % Deckkraft
+                                    ColorAttribute.createDiffuse(new Color(1f, 0f, 0f, 0.35f)),
+                                    // Blending aktivieren (SRC_ALPHA / ONE_MINUS_SRC_ALPHA) und denselben Alpha-Wert setzen
+                                    new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA, 0.55f)
+                            ),
+                            Usage.Position | Usage.Normal   // ColorPacked ist hier entbehrlich
+                        );
+
+                        highlightedNodeModelInstance = new ModelInstance(sphereModel);
+                        highlightedNodeModelInstance.transform.setToTranslation(node.getPosition().cpy().add(0, 0.2f ,0));
+                    }
+                    modelBatch.render(highlightedNodeModelInstance);
+                    return;
+                }
+                
+            }
+            currentlyHighlightedNode = null;
         }
     }
 
@@ -154,7 +196,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     public void render(ModelBatch modelBatch, Environment environment) {
 
         highlightObjectUnderMouse(modelBatch, environment);
-
+        modelBatch.render(modelInstances, environment);
     }
 
     @Override
@@ -191,6 +233,14 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      */
     public Optional<Tile> getCurrentlyHighlightedTile() {
         return currentlyHighlightedTile == null ? Optional.empty() : Optional.of(currentlyHighlightedTile);
+    }
+
+    /**
+     * @return Gibt die Node (Ecke) zurück, die aktuell unter der Maus ist
+     * ist gerade keine Ecke unter der Maus, so wird ein leeres Optional zurückgegeben
+     */
+    public Optional<Node> getCurrentlyHighlightedNode() {
+        return currentlyHighlightedNode == null ? Optional.empty() : Optional.of(currentlyHighlightedNode);
     }
 
     public void setHighlightingType(HighlightingType highlightingType) {

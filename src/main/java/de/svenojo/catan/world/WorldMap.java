@@ -251,6 +251,14 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     public void dispose() {}
 
+    public void setHighlightingType(HighlightingType highlightingType) {
+        this.highlightingType = highlightingType;
+    }
+
+    public HighlightingType getHighlightingType() {
+        return highlightingType;
+    }
+
     /**
      * @return Gibt das Tile zurück, das aktuell unter der Maus ist
      */
@@ -266,11 +274,12 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         return currentlyHighlightedNode == null ? Optional.empty() : Optional.of(currentlyHighlightedNode);
     }
 
-    public void setHighlightingType(HighlightingType highlightingType) {
-        this.highlightingType = highlightingType;
+     /**
+     * @return Gibt die Node (Ecke) zurück, die aktuell unter der Maus ist
+     * ist gerade keine Ecke unter der Maus, so wird ein leeres Optional zurückgegeben
+     */
+    public Optional<Edge> getCurrentlyHighlightedEdge() {
+        return currentlyHighlightedEdge == null ? Optional.empty() : Optional.of(currentlyHighlightedEdge);
     }
 
-    public HighlightingType getHighlightingType() {
-        return highlightingType;
-    }
 }

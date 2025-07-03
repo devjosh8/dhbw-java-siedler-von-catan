@@ -28,6 +28,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
+import de.svenojo.util.PlayerOptions;
 
 public class PlayerSelectorScreen implements Screen {
 
@@ -133,7 +134,8 @@ public class PlayerSelectorScreen implements Screen {
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
-                this.catanGame.setScreen(new GameScreen(this.catanGame));
+                PlayerOptions PlayerOptions = new PlayerOptions(players);
+                this.catanGame.setScreen(new GameScreen(this.catanGame, PlayerOptions));
                 return true;
             }
             return false;

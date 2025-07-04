@@ -79,7 +79,7 @@ public class GameScreen implements Screen {
 
         // TODO: zum späteren Zeitpunkt entfernen
         // Testweise Buildings hinzufügen
-        Player player = new Player("bob", Color.RED);
+        Player player = new Player(1, "bob", Color.RED);
         for(Edge node : worldMap.getNodeGraph().edgeSet()) {
             if(new Random().nextInt(3) == 0) {
                 //BuildingStreet street = new BuildingStreet(player, edge);

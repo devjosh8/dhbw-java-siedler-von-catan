@@ -1,7 +1,11 @@
 package de.svenojo.catan.world.map;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.Stack;
 
 import org.jgrapht.Graph;
 
@@ -15,22 +19,47 @@ import de.svenojo.catan.world.tile.TileType;
 
 public class MapGenerator {
 
+    public static Stack<TileType> getTileTypeDistributionStack() {
+        Stack<TileType> tileTypeStack = new Stack<>();
+        for(int i = 0; i < 4; i++ ) {
+            tileTypeStack.push(TileType.FOREST);
+            tileTypeStack.push(TileType.FIELDS);
+            tileTypeStack.push(TileType.PASTURE);
+        }
+        for (int i = 0; i < 3; i++) {
+            tileTypeStack.push(TileType.MOUNTAINS);
+            tileTypeStack.push(TileType.HILLS);
+        }
+        tileTypeStack.push(TileType.DESERT);
+
+        Collections.shuffle(tileTypeStack);
+
+        return tileTypeStack;
+    }
+
     /**
-     * Generiert die Karte für das Spiel, dazu den NodeGraph und befüllt alle Argumente mit Inhalt
-     * @param mapTiles eine leere Liste, die mit den generierten MapTiles gefüllt wird
-     * @param nodeGraph eine Leere Graph<Node, Edge> Einheit, die mit dem Graphen der Karte bestehend aus Nodes
-     * und Edges gefüllt wird
-     * @param nodes Eine Leere Liste von Nodes, die durch die Methide gefüllt wird
+     * Generiert die Karte für das Spiel, dazu den NodeGraph und befüllt alle
+     * Argumente mit Inhalt
+     * 
+     * @param mapTiles  eine leere Liste, die mit den generierten MapTiles gefüllt
+     *                  wird
+     * @param nodeGraph eine Leere Graph<Node, Edge> Einheit, die mit dem Graphen
+     *                  der Karte bestehend aus Nodes
+     *                  und Edges gefüllt wird
+     * @param nodes     Eine Leere Liste von Nodes, die durch die Methide gefüllt
+     *                  wird
      */
     public static void generateMap(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes) {
         int mapRadius = 2;
 
+        Stack<TileType> tileTypeStack = getTileTypeDistributionStack();
+
         for (int q = -mapRadius; q <= mapRadius; q++) {
             for (int r = Math.max(-mapRadius, -q - mapRadius); r <= Math.min(mapRadius, -q + mapRadius); r++) {
                 AxialVector tilePosition = new AxialVector(q, r);
-                Tile worldTile = new Tile(tilePosition, TileType.values()[new Random().nextInt(TileType.values().length)]);
+                Tile worldTile = new Tile(tilePosition, tileTypeStack.pop());
                 mapTiles.add(worldTile);
-                
+
             }
         }
 
@@ -39,36 +68,35 @@ public class MapGenerator {
 
     private static void generateNodeGraph(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes) {
         Vector3[] positions = {
-            new Vector3(0, 0, -2),
-            new Vector3((float) Math.sqrt(3), 0, -1),
-            new Vector3((float) Math.sqrt(3), 0, 1),
-            new Vector3(0, 0, 2),
-            new Vector3((float) -Math.sqrt(3), 0, 1),
-            new Vector3((float) -Math.sqrt(3), 0, -1),
+                new Vector3(0, 0, -2),
+                new Vector3((float) Math.sqrt(3), 0, -1),
+                new Vector3((float) Math.sqrt(3), 0, 1),
+                new Vector3(0, 0, 2),
+                new Vector3((float) -Math.sqrt(3), 0, 1),
+                new Vector3((float) -Math.sqrt(3), 0, -1),
 
-            new Vector3(0, 0, -2)
+                new Vector3(0, 0, -2)
         };
-
 
         float nodePositionTolerance = 0.1f;
         Node lastNode = null;
         boolean createNewNode = false;
         int nodesCreatedCounter = 0;
 
-        for(Tile tile : mapTiles) {
+        for (Tile tile : mapTiles) {
             float tileX = tile.getWorldPosition().x;
             float tileZ = tile.getWorldPosition().z;
 
-            for(Vector3 offsetPosition : positions) {
+            for (Vector3 offsetPosition : positions) {
                 createNewNode = true;
-                for(Node node : nodes) {
-                    if(     Math.abs(node.getPosition().x - (tileX + offsetPosition.x)) <= nodePositionTolerance 
-                        &&  Math.abs(node.getPosition().z - (tileZ + offsetPosition.z) )<= nodePositionTolerance ) {
+                for (Node node : nodes) {
+                    if (Math.abs(node.getPosition().x - (tileX + offsetPosition.x)) <= nodePositionTolerance
+                            && Math.abs(node.getPosition().z - (tileZ + offsetPosition.z)) <= nodePositionTolerance) {
                         createNewNode = false;
 
                         node.addNeighbourTile(tile);
-                        if(lastNode != null) {
-                            if(! (nodeGraph.containsEdge(node, lastNode)) ) {
+                        if (lastNode != null) {
+                            if (!(nodeGraph.containsEdge(node, lastNode))) {
                                 nodeGraph.addEdge(node, lastNode, new Edge(node, lastNode));
                                 lastNode = node;
                                 break;
@@ -78,8 +106,7 @@ public class MapGenerator {
                     }
                 }
 
-                
-                if(createNewNode) {
+                if (createNewNode) {
                     nodesCreatedCounter++;
                     Node currentNode = new Node(new Vector3(tileX + offsetPosition.x, 0, tileZ + offsetPosition.z));
                     currentNode.setNumber(nodesCreatedCounter);
@@ -88,13 +115,13 @@ public class MapGenerator {
                     nodes.add(currentNode);
                     nodeGraph.addVertex(currentNode);
 
-                    if(lastNode != null) {
+                    if (lastNode != null) {
                         nodeGraph.addEdge(currentNode, lastNode, new Edge(lastNode, currentNode));
                     }
 
                     lastNode = currentNode;
                 }
-            } 
+            }
             lastNode = null;
         }
     }

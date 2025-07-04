@@ -12,12 +12,8 @@ public enum TileType {
     FIELDS("data/models/karte_farmland.g3db"),
     /** für Schaf / Wolle */
     PASTURE("data/models/karte_weideland.g3db"),
-    /**
-     * TODO: richtiges modell einfügen für Lehm
-     * 
-     * Für Lehm
-     */
-    HILLS("data/models/karte_wueste.g3db");
+    /** Für Lehm */
+    HILLS("data/models/karte_lehm.g3db");
 
     private String fileName;
 

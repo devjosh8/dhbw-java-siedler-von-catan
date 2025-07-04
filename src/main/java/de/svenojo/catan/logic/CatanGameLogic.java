@@ -27,10 +27,15 @@ public class CatanGameLogic {
         }
     }
 
+    private final DiceRoll diceRoll = new DiceRoll();
+
     private GameState currentGameState;
     private RoundPhase currentRoundPhase;
+
     private Player[] players;
     private int currentPlayerIndex;
+
+    private int rolledNumber;
 
     public Player getCurrentPlayer() {
         return players[currentPlayerIndex];
@@ -44,5 +49,26 @@ public class CatanGameLogic {
         NextPhaseResult result = this.currentRoundPhase.next();
         currentRoundPhase = result.getNextPhase();
         if (result.isFullRoundCompleted()) nextPlayer();
+    }
+
+    public void playRoundPhase() {
+        switch (currentRoundPhase) {
+            case DICE_ROLL:
+                this.rolledNumber = diceRoll.rollBothDice();
+                break;
+            case MATERIAL_DISTRIBUTION:
+
+                break;
+            case ROBBER:
+
+                break;
+            case BUILD:
+
+                break;
+
+            default:
+                System.err.println("The current RoundPhase " + currentRoundPhase.toString() + " cannot be played.");
+                break;
+        }
     }
 }

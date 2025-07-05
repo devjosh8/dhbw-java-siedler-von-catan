@@ -19,9 +19,15 @@ import de.svenojo.catan.world.tile.TileType;
 
 public class MapGenerator {
 
+    /**
+     * Generiert einen gemischten Stack mit der richigen Anzahl an verschiedenen
+     * Tile Types.
+     * 
+     * @return gemischter Stack an Tile Types
+     */
     public static Stack<TileType> getTileTypeDistributionStack() {
         Stack<TileType> tileTypeStack = new Stack<>();
-        for(int i = 0; i < 4; i++ ) {
+        for (int i = 0; i < 4; i++) {
             tileTypeStack.push(TileType.FOREST);
             tileTypeStack.push(TileType.FIELDS);
             tileTypeStack.push(TileType.PASTURE);
@@ -35,6 +41,31 @@ public class MapGenerator {
         Collections.shuffle(tileTypeStack);
 
         return tileTypeStack;
+    }
+
+    /**
+     * Generiert einen gemischten Stack mit der richtigen Anzahl an Nummern für die
+     * einzelnen Felder
+     * 
+     * @return gemischter Stack an Nummern für die Felder (Tiles)
+     */
+
+    public static Stack<Integer> getTileNumberDistributionStack() {
+        Stack<Integer> tileNumberStack = new Stack<>();
+        int[] doubleNumbers = { 3, 4, 5, 6, 8, 9, 10, 11 };
+        int[] singleNumbers = { 2, 12 };
+
+        for (int i : doubleNumbers) {
+            tileNumberStack.push(i);
+            tileNumberStack.push(i);
+        }
+
+        for (int i : singleNumbers) {
+            tileNumberStack.push(i);
+        }
+
+        Collections.shuffle(tileNumberStack);
+        return tileNumberStack;
     }
 
     /**
@@ -53,11 +84,15 @@ public class MapGenerator {
         int mapRadius = 2;
 
         Stack<TileType> tileTypeStack = getTileTypeDistributionStack();
+        Stack<Integer> tileNumberStack = getTileNumberDistributionStack();
 
         for (int q = -mapRadius; q <= mapRadius; q++) {
             for (int r = Math.max(-mapRadius, -q - mapRadius); r <= Math.min(mapRadius, -q + mapRadius); r++) {
                 AxialVector tilePosition = new AxialVector(q, r);
-                Tile worldTile = new Tile(tilePosition, tileTypeStack.pop());
+
+                TileType tileType = tileTypeStack.pop();
+                int numberValue = (tileType != TileType.DESERT) ? tileNumberStack.pop() : 7;
+                Tile worldTile = new Tile(tilePosition, tileType, numberValue);
                 mapTiles.add(worldTile);
 
             }

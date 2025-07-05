@@ -241,12 +241,24 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             Vector3 screenCoords = new Vector3(textPosition);
             camera.project(screenCoords);
 
+            int tileNumberValue = t.getNumberValue();
+
+            if(tileNumberValue == 7) continue;
+
+            if (tileNumberValue == 6 | tileNumberValue == 8) {
+                float r = 207/255f;
+                float g = 52/255f;
+                float b = 22/255f;
+                bitmapFont.setColor(new Color(r, g, b, 1));
+            }
+
             GlyphLayout layout = new GlyphLayout();
-            layout.setText(bitmapFont, String.valueOf(t.getNumberValue()));
+            layout.setText(bitmapFont, String.valueOf(tileNumberValue));
 
             if (screenCoords.z > 0 && screenCoords.z < 1) {
-                bitmapFont.draw(spriteBatch, String.valueOf(t.getNumberValue()), screenCoords.x - layout.width / 2, screenCoords.y + layout.height / 2);
+                bitmapFont.draw(spriteBatch, String.valueOf(tileNumberValue), screenCoords.x - layout.width / 2, screenCoords.y + layout.height / 2);
             }
+            bitmapFont.setColor(Color.WHITE);
         }
     }
 

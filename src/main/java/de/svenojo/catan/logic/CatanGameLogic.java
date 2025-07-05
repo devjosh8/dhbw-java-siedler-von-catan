@@ -5,6 +5,7 @@ import de.svenojo.catan.player.Player;
 public class CatanGameLogic {
     enum GameState {
         PRE_GAME,
+        SETTLE_PLAYERS,
         GAME,
         GAME_ENDING
     }
@@ -48,7 +49,8 @@ public class CatanGameLogic {
     public void nextRoundPhase() {
         NextPhaseResult result = this.currentRoundPhase.next();
         currentRoundPhase = result.getNextPhase();
-        if (result.isFullRoundCompleted()) nextPlayer();
+        if (result.isFullRoundCompleted())
+            nextPlayer();
     }
 
     public void playRoundPhase() {
@@ -57,9 +59,12 @@ public class CatanGameLogic {
                 this.rolledNumber = diceRoll.rollBothDice();
                 break;
             case MATERIAL_DISTRIBUTION:
-
+                if (this.rolledNumber == 7)
+                    break;
                 break;
             case ROBBER:
+                if (this.rolledNumber != 7)
+                    break;
 
                 break;
             case BUILD:

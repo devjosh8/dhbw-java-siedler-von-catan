@@ -17,6 +17,7 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
+import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
@@ -39,6 +40,8 @@ public class GameScreen implements Screen {
     private boolean assetsLoading;
 
     private CatanGame catanGame;
+
+    private GameUI gameUI;
 
     public GameScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
@@ -64,6 +67,8 @@ public class GameScreen implements Screen {
         Gdx.input.setInputProcessor(cameraInputController);
 
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+
+        gameUI = new GameUI();
 
         catanAssetManager = catanGame.getCatanAssetManager();
 
@@ -111,12 +116,16 @@ public class GameScreen implements Screen {
         } 
 
         spriteBatch.end();
+
+        gameUI.render(delta);
     }
 
     @Override
     public void dispose() {
         modelBatch.dispose();
         worldMap.dispose();
+
+        gameUI.dispose();
     }
 
     @Override

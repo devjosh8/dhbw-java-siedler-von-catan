@@ -52,6 +52,8 @@ public class CatanAssetManager {
             loadModel(type.getFileName());
         }
 
+        loadModel("data/models/bandit.g3db");
+
         FreeTypeFontGenerator robotoGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-Bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter robotoParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         robotoParameter.size = Globals.IS_MACOS ? 48 : 24;

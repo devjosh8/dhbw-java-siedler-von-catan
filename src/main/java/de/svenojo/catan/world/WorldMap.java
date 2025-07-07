@@ -35,6 +35,7 @@ import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
+import de.svenojo.catan.world.bandit.Bandit;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingCalculator;
 import de.svenojo.catan.world.map.MapGenerator;
@@ -62,6 +63,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private BitmapFont bitmapFont;
 
     private BuildingCalculator buildingCalculator;
+    private Bandit bandit;
 
     /**
      *  für die Kollissionsberechnung benötigte Hilfsvariablen 
@@ -89,6 +91,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         nodes = new ArrayList<>();
         buildings = new HashSet<>();
         this.buildingCalculator = new BuildingCalculator(catanAssetManager);
+        bandit = new Bandit(catanAssetManager);
 
         nodeGraph = GraphTypeBuilder
             .<Node, Edge> undirected().allowingMultipleEdges(false)
@@ -105,7 +108,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     }
 
     public void loadAssets() {
-
         for(Tile worldTile : mapTiles) {
             Model worldTileModel = catanAssetManager.getAssetManager().get(worldTile.getWorldTileType().getFileName(), Model.class);
             ModelInstance modelInstance = new ModelInstance(worldTileModel);
@@ -126,7 +128,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             tileMeshes.add(tileMesh);
 
         }
-
+        placeBandit(mapTiles.get(2));
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;
     }
 
@@ -136,6 +138,15 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             buildings.add(building);
             modelInstances.add(modelInstance);
         }
+    }
+
+
+    /**
+     * Methode, die den Bandit auf der Karte platziert
+     * @param Das Tile auf dem der Bandit platziert werden soll
+     */
+    public void placeBandit(Tile tile) {
+        bandit.setPosition(tile);
     }
 
 
@@ -226,7 +237,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
-
+        bandit.render(modelBatch);
         highlightObjectUnderMouse(modelBatch, environment);
         modelBatch.render(modelInstances, environment);
     }

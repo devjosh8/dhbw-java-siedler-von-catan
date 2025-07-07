@@ -20,8 +20,11 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.MapWater;
+import de.svenojo.catan.world.Node;
 import de.svenojo.catan.world.WorldMap;
+import de.svenojo.catan.world.building.buildings.BuildingCity;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
+import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
 public class GameScreen implements Screen {
     /**
@@ -88,8 +91,16 @@ public class GameScreen implements Screen {
         for(Edge node : worldMap.getNodeGraph().edgeSet()) {
             if(new Random().nextInt(3) == 0) {
                 //BuildingStreet street = new BuildingStreet(player, edge);
-                BuildingSettlement settlement = new BuildingSettlement(player, worldMap.getNodeGraph().getEdgeSource(node));
-                worldMap.placeBuilding(player, settlement);
+                //BuildingSettlement settlement = new BuildingSettlement(player, worldMap.getNodeGraph().getEdgeSource(node));
+                BuildingCity city = new BuildingCity(player, worldMap.getNodeGraph().getEdgeSource(node));
+                worldMap.placeBuilding(player, city);
+            }
+        }
+
+         for(Edge node : worldMap.getNodeGraph().edgeSet()) {
+            if(new Random().nextInt(3) == 0) {
+                BuildingStreet street = new BuildingStreet(player, node);
+                worldMap.placeBuilding(player, street);
             }
         }
 

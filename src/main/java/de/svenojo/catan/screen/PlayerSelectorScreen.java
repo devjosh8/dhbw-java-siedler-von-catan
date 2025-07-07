@@ -44,6 +44,7 @@ public class PlayerSelectorScreen implements Screen {
 
     private Sound clickSound;
 
+    private TextButton startButton;
     private final List<Player> players = new ArrayList<>();
     private final List<Color> availableColors = List.of(Color.RED, Color.YELLOW, Color.BLUE, Color.GREEN);
 
@@ -99,16 +100,6 @@ public class PlayerSelectorScreen implements Screen {
         playerContainer.defaults().pad(10).top().left();
         root.add(playerContainer).colspan(2).row();
 
-        playerCountBox.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                int count = playerCountBox.getSelected();
-                buildPlayerInputs(playerContainer, count);
-            }
-        });
-
-        buildPlayerInputs(playerContainer, 4);
-
     
         TextButton.TextButtonStyle baseButtonStyle = skin.get(TextButton.TextButtonStyle.class);
         TextButton.TextButtonStyle customButtonStyle = new TextButton.TextButtonStyle();
@@ -130,7 +121,8 @@ public class PlayerSelectorScreen implements Screen {
         });
         backButton.getLabel().setFontScale(1f);
 
-        TextButton startButton = new TextButton("Spiel starten", customButtonStyle);
+        startButton = new TextButton("Spiel starten", customButtonStyle);
+        startButton.setDisabled(true);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
@@ -142,6 +134,18 @@ public class PlayerSelectorScreen implements Screen {
         });
 
 
+        playerCountBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                int selectedPlayerCount = playerCountBox.getSelected(); 
+                buildPlayerInputs(playerContainer, selectedPlayerCount);
+                startButton.setDisabled(true);
+            }
+        });
+
+        buildPlayerInputs(playerContainer, 4);
+
+
         root.row();
         root.add(startButton).width(560).height(80).padTop(200);
         root.row();
@@ -150,13 +154,12 @@ public class PlayerSelectorScreen implements Screen {
     }
 
 
-private void buildPlayerInputs(Table container, int count) {
+private void buildPlayerInputs(Table container, int selectedPlayerCount) {
         container.clear();
         players.clear();
 
-        for (int i = 0; i < count; i++) {
+        for (int i = 0; i < selectedPlayerCount; i++) {
             Table playerTable = new Table(skin);
-            //playerTable.setBackground("default"); -> wie Hintergrund definieren? default nur Platzhalter
 
             TextField nameField = new TextField("", skin);
             nameField.setMessageText("Spielername");
@@ -208,6 +211,12 @@ private void buildPlayerInputs(Table container, int count) {
                     confirmButton.setDisabled(true);
                     for (TextButton button : colorButtons.getButtons()) {
                         button.setDisabled(true);
+                    }
+
+                    if (players.size() == selectedPlayerCount) {
+                        startButton.setDisabled(false);
+                    } else {
+                        startButton.setDisabled(true);
                     }
                 }
             });

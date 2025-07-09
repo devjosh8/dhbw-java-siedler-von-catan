@@ -46,8 +46,19 @@ public class PlayerSelectorScreen implements Screen {
 
     private TextButton startButton;
     private final List<Player> players = new ArrayList<>();
-    private final List<Color> availableColors = List.of(Color.RED, Color.YELLOW, Color.BLUE, Color.GREEN);
+    private int selectedPlayerCount = 4;
+    private final List<Color> availableColors = List.of(Color.RED, Color.ROYAL, Color.SKY, Color.ORANGE);
+    private final List<ColorButtonEntry> allColorButtons = new ArrayList<>();
 
+    private static class ColorButtonEntry {
+        public final TextButton button;
+        public final Color color;
+    
+        public ColorButtonEntry(TextButton button, Color color) {
+            this.button = button;
+            this.color = color;
+        }
+    }
 
     public PlayerSelectorScreen(CatanGame catanGame) {
         this.catanGame = catanGame;
@@ -82,24 +93,41 @@ public class PlayerSelectorScreen implements Screen {
         stage.addActor(root);
 
         Label.LabelStyle descriptionStyle = new Label.LabelStyle(bitmapFontWithBorder, Color.WHITE);
-        Label selectorDescription = new Label("Willkommen in Catan, Abenteurer! Bitte tragt hier eure Namen ein und wählt eine Farbe:", descriptionStyle);
+        Label welcome = new Label("Willkommen in Catan, Abenteurer!", skin, "title");
+        welcome.getStyle().fontColor = Color.WHITE;
+        welcome.setFontScale(2f);
+        Label selectorDescription = new Label("Bitte tragt hier eure Namen ein und wählt eine Farbe:", descriptionStyle);
         selectorDescription.getStyle().fontColor = Color.WHITE;
-        selectorDescription.setFontScale(1.5f);
+        selectorDescription.setFontScale(1f);
         selectorDescription.setAlignment(Align.center);
-        root.add(selectorDescription).padBottom(80).row();
+        root.add(welcome).padBottom(40).row();
+        root.add(selectorDescription).padBottom(50);
+        root.row();
         
         Label playerCounterDescription = new Label("Anzahl Spieler:", descriptionStyle);
         selectorDescription.setFontScale(1f);
-        root.add(playerCounterDescription);
 
         SelectBox<Integer> playerCountBox = new SelectBox<>(skin);
         playerCountBox.setItems(2, 3, 4);
-        root.add(playerCountBox).row();
+        Table playerCountRow = new Table();
+        playerCountRow.add(playerCounterDescription).padRight(30);
+        playerCountRow.add(playerCountBox);
+        root.add(playerCountRow).center().row();
 
         Table playerContainer = new Table();
-        playerContainer.defaults().pad(10).top().left();
+        playerContainer.defaults().pad(40).top().left();
         root.add(playerContainer).colspan(2).row();
 
+        playerCountBox.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                selectedPlayerCount = playerCountBox.getSelected(); 
+                buildPlayerInputs(playerContainer, selectedPlayerCount);
+                startButton.setDisabled(true);
+            }
+        });
+
+        buildPlayerInputs(playerContainer, 4);
     
         TextButton.TextButtonStyle baseButtonStyle = skin.get(TextButton.TextButtonStyle.class);
         TextButton.TextButtonStyle customButtonStyle = new TextButton.TextButtonStyle();
@@ -125,25 +153,25 @@ public class PlayerSelectorScreen implements Screen {
         startButton.setDisabled(true);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
-                clickSound.play();
-                PlayerOptions PlayerOptions = new PlayerOptions(players);
-                this.catanGame.setScreen(new GameScreen(this.catanGame, PlayerOptions));
-                return true;
+                if (players.size() < selectedPlayerCount) {
+                    Dialog error = new Dialog("Fehler", skin);
+                    error.text("  Bitte zuerst alle Spieler anlegen!  ");
+                    error.button("OK");
+                    error.setColor(Color.SKY);
+                    error.show(stage);
+                    return false;
+                }
+                else {
+                    clickSound.play();
+                    PlayerOptions PlayerOptions = new PlayerOptions(players);
+                    this.catanGame.setScreen(new GameScreen(this.catanGame, PlayerOptions));
+                    return true;
+                }
             }
             return false;
         });
 
 
-        playerCountBox.addListener(new ChangeListener() {
-            @Override
-            public void changed(ChangeEvent event, Actor actor) {
-                int selectedPlayerCount = playerCountBox.getSelected(); 
-                buildPlayerInputs(playerContainer, selectedPlayerCount);
-                startButton.setDisabled(true);
-            }
-        });
-
-        buildPlayerInputs(playerContainer, 4);
 
 
         root.row();
@@ -157,21 +185,33 @@ public class PlayerSelectorScreen implements Screen {
 private void buildPlayerInputs(Table container, int selectedPlayerCount) {
         container.clear();
         players.clear();
+        allColorButtons.clear();
 
         for (int i = 0; i < selectedPlayerCount; i++) {
             Table playerTable = new Table(skin);
 
-            TextField nameField = new TextField("", skin);
+            Label playerLabel = new Label("Spieler " + (i + 1), skin);
+            playerLabel.getStyle().fontColor = Color.WHITE;
+            playerLabel.setFontScale(1.5f);
+
+            TextField nameField = new TextField("",skin);
             nameField.setMessageText("Spielername");
+            nameField.setSize(250, 40);
 
             Label colorLabel = new Label("Farbe: ", skin);
+            colorLabel.getStyle().fontColor = Color.WHITE;
+            colorLabel.setFontScale(1.5f);
             ButtonGroup<TextButton> colorButtons = new ButtonGroup<>();
             Table colorTable = new Table();
             colorTable.defaults().padRight(5);
 
+            List<TextButton> thisPlayersColorButtons = new ArrayList<>();
+
             for (Color color : availableColors) {
                 TextButton colorButton = new TextButton("", skin);
                 colorButton.setColor(color);
+                thisPlayersColorButtons.add(colorButton);
+
                 colorButton.addListener(new ChangeListener() {
                     @Override
                     public void changed(ChangeEvent event, Actor actor) {
@@ -180,9 +220,12 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
                 });
                 colorButtons.add(colorButton);
                 colorTable.add(colorButton);
+                allColorButtons.add(new ColorButtonEntry(colorButton, color));
             }
 
             TextButton confirmButton = new TextButton("Spieler festlegen", skin);
+            confirmButton.getLabel().setColor(Color.WHITE);
+            confirmButton.getLabel().setFontScale(1.5f);
             confirmButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
@@ -190,8 +233,9 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
                     TextButton selected = colorButtons.getChecked();
                     if (name.isEmpty() || selected == null) {
                         Dialog error = new Dialog("Fehler", skin);
-                        error.text("Bitte Namen und Farbe angeben!");
+                        error.text("  Bitte Namen und Farbe angeben!  ");
                         error.button("OK");
+                        error.setColor(Color.SKY);
                         error.show(stage);
                         return;
                     }
@@ -199,6 +243,13 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
                     Color selectedColor = selected.getColor();
                     Player player = new Player(name, selectedColor);
                     players.add(player);
+
+                    for (ColorButtonEntry entry : allColorButtons) {
+                        if (entry.color.equals(selectedColor) && !entry.button.isChecked()) {
+                            entry.button.setDisabled(true);
+                            entry.button.setColor(Color.GRAY);
+                        }
+                    }
                     /*Konsolenausgaben um richtiges Anlegen der Player zu prüfen:
                     String newplayername = player.getName();
                     Color newplayerColor = player.getColor();
@@ -209,6 +260,7 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
                     nameField.setDisabled(true);
                     selected.setDisabled(true);
                     confirmButton.setDisabled(true);
+                    confirmButton.setColor(Color.GRAY);
                     for (TextButton button : colorButtons.getButtons()) {
                         button.setDisabled(true);
                     }
@@ -221,13 +273,13 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
                 }
             });
 
-            playerTable.add("Spieler " + (i + 1)).left().row();
-            playerTable.add(nameField).width(200).row();
-            playerTable.add(colorLabel).left().row();
-            playerTable.add(colorTable).row();
-            playerTable.add(confirmButton).padTop(10).row();
+            playerTable.add(playerLabel).left().row();
+            playerTable.add(nameField).width(300).padTop(10).row();
+            playerTable.add(colorLabel).padTop(40).left().row();
+            playerTable.add(colorTable).padTop(20).row();
+            playerTable.add(confirmButton).padTop(50).row();
 
-            container.add(playerTable).left();
+            container.add(playerTable).padTop(50).left();
         }
     }
     @Override

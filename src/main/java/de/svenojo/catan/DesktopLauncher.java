@@ -20,6 +20,7 @@ public class DesktopLauncher {
         configuration.setWindowedMode(Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
         configuration.setWindowIcon("data/icons/window_icon48x48.png");
         configuration.setResizable(false);
+        System.setProperty("org.lwjgl.opengl.Display.allowHighDPI", "false");
         new Lwjgl3Application(new CatanGame(), configuration);
     }
 

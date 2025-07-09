@@ -42,6 +42,7 @@ import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
 import de.svenojo.catan.world.tile.TileMesh;
+import de.svenojo.catan.world.tile.TileType;
 import de.svenojo.catan.world.util.HighlightingType;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
@@ -127,8 +128,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             tileMesh.setHexagonTriangles(worldTile.getWorldPosition(), Tile.WORLD_TILE_DISTANCE);
             tileMeshes.add(tileMesh);
 
+            if(worldTile.getWorldTileType() == TileType.DESERT) {
+                placeBandit(worldTile);
+            }
         }
-        placeBandit(mapTiles.get(2));
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;
     }
 

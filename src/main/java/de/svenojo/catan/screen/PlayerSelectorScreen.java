@@ -98,14 +98,14 @@ public class PlayerSelectorScreen implements Screen {
         welcome.setFontScale(1f);
         Label selectorDescription = new Label("Bitte tragt hier eure Namen ein und wählt eine Farbe:", descriptionStyle);
         selectorDescription.getStyle().fontColor = Color.WHITE;
-        selectorDescription.setFontScale(0.5f);
+        selectorDescription.setFontScale(1f);
         selectorDescription.setAlignment(Align.center);
         root.add(welcome).padBottom(40/2).row();
         root.add(selectorDescription).padBottom(50/2);
         root.row();
         
         Label playerCounterDescription = new Label("Anzahl Spieler:", descriptionStyle);
-        selectorDescription.setFontScale(0.5f);
+        selectorDescription.setFontScale(1f);
 
         SelectBox<Integer> playerCountBox = new SelectBox<>(skin);
         playerCountBox.setItems(2, 3, 4);
@@ -151,7 +151,7 @@ public class PlayerSelectorScreen implements Screen {
         backButton.getLabel().setFontScale(1f);
 
         startButton = new TextButton("Spiel starten", customButtonStyle);
-        startButton.getLabel().setFontScale(0.5f);
+        startButton.getLabel().setFontScale(1f);
         startButton.setDisabled(true);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {

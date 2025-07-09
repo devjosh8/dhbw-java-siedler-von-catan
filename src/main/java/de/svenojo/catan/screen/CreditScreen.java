@@ -82,18 +82,18 @@ public class CreditScreen implements Screen {
 
         clickSound = catanAssetManager.getSound("data/sounds/click_sound.wav");
 
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
+        Table root = new Table();
+        root.setFillParent(true);
+        root.center();
         
-        table.add(creditsTitle).padBottom(20);
-        table.row();
-        table.add(creditsNames).padBottom(80);
-        table.row();
-        table.add(backButton).width(560).height(80);
+        root.add(creditsTitle).padBottom(20);
+        root.row();
+        root.add(creditsNames).padBottom(80);
+        root.row();
+        root.add(backButton).width(560/2).height(80/2);
         
         stage.addActor(backgroundImage);
-        stage.addActor(table);
+        stage.addActor(root);
     }
     
     @Override

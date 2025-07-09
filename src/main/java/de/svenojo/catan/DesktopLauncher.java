@@ -13,13 +13,17 @@ public class DesktopLauncher {
         configuration.setIdleFPS(Globals.FPS);
         configuration.useVsync(Globals.USE_VSYNC);
         if(isMacOS()) {
-            configuration.setHdpiMode(HdpiMode.Pixels);
             Globals.IS_MACOS = true;
+            configuration.setWindowedMode(Globals.GAME_WIDTH/2, Globals.GAME_HEIGHT/2);
+        } else {
+             //configuration.setHdpiMode(HdpiMode.Logical);
+             configuration.setWindowedMode(Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
+             System.out.println("meddl");
         }
         configuration.setTitle(Globals.GAME_TITLE);
-        configuration.setWindowedMode(Globals.GAME_WIDTH, Globals.GAME_HEIGHT);
         configuration.setWindowIcon("data/icons/window_icon48x48.png");
         configuration.setResizable(false);
+        configuration.setHdpiMode(HdpiMode.Pixels);
         new Lwjgl3Application(new CatanGame(), configuration);
     }
 

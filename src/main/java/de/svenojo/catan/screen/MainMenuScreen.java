@@ -66,11 +66,11 @@ public class MainMenuScreen implements Screen {
         customButtonStyle.disabled = baseButtonStyle.disabled;
         customButtonStyle.font = bitmapFontWithoutBorder;
         
-        TextButton startButton = new TextButton("Spiel starten", customButtonStyle);
+        TextButton startButton = new TextButton("Neues Spiel", customButtonStyle);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
-                this.catanGame.setScreen(new GameScreen(this.catanGame));
+                this.catanGame.setScreen(new PlayerSelectorScreen(this.catanGame));
                 return true;
             }
             return false;
@@ -101,19 +101,19 @@ public class MainMenuScreen implements Screen {
         clickSound = catanAssetManager.getSound("data/sounds/click_sound.wav");
 
 
-        Table table = new Table();
-        table.setFillParent(true);
-        table.center();
-        table.add(introduction).width(1500).padTop(150).padBottom(50);;
-        table.row();
-        table.add(startButton).width(450).height(80);
-        table.row();
-        table.add(creditButton).width(450).height(80).padTop(20);
-        table.row();
-        table.add(exitButton).width(450).height(80).padTop(20);
+        Table root = new Table();
+        root.setFillParent(true);
+        root.center();
+        root.add(introduction).width(1500/2).padTop(150).padBottom(50);;
+        root.row();
+        root.add(startButton).width(450/2).height(80/2);
+        root.row();
+        root.add(creditButton).width(450/2).height(80/2).padTop(20);
+        root.row();
+        root.add(exitButton).width(450/2).height(80/2).padTop(20);
 
         stage.addActor(backgroundImage);
-        stage.addActor(table);
+        stage.addActor(root);
     }
 
     @Override

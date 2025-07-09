@@ -22,6 +22,10 @@ import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 
+import de.svenojo.catan.world.building.buildings.BuildingStreet;
+import de.svenojo.util.PlayerOptions;
+
+
 public class GameScreen implements Screen {
     /**
      * TODO: Kamera und Environment in eigene Klasse auslagern (Renderer.java oder sowat)
@@ -40,7 +44,7 @@ public class GameScreen implements Screen {
 
     private CatanGame catanGame;
 
-    public GameScreen(CatanGame catanGame) {
+    public GameScreen(CatanGame catanGame, PlayerOptions playerOptions) {
         this.catanGame = catanGame;
         modelBatch = new ModelBatch();
         spriteBatch = new SpriteBatch();

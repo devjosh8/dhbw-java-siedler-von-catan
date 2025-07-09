@@ -104,13 +104,13 @@ public class MainMenuScreen implements Screen {
         Table root = new Table();
         root.setFillParent(true);
         root.center();
-        root.add(introduction).width(1500).padTop(150).padBottom(50);;
+        root.add(introduction).width(1500/2).padTop(150).padBottom(50);;
         root.row();
-        root.add(startButton).width(450).height(80);
+        root.add(startButton).width(450/2).height(80/2);
         root.row();
-        root.add(creditButton).width(450).height(80).padTop(20);
+        root.add(creditButton).width(450/2).height(80/2).padTop(20);
         root.row();
-        root.add(exitButton).width(450).height(80).padTop(20);
+        root.add(exitButton).width(450/2).height(80/2).padTop(20);
 
         stage.addActor(backgroundImage);
         stage.addActor(root);

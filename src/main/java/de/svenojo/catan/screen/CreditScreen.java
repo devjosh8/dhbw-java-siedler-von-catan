@@ -90,7 +90,7 @@ public class CreditScreen implements Screen {
         root.row();
         root.add(creditsNames).padBottom(80);
         root.row();
-        root.add(backButton).width(560).height(80);
+        root.add(backButton).width(560/2).height(80/2);
         
         stage.addActor(backgroundImage);
         stage.addActor(root);

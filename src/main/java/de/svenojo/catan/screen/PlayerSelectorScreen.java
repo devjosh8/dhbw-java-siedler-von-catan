@@ -86,8 +86,8 @@ public class PlayerSelectorScreen implements Screen {
 
         Table root = new Table();
         root.setFillParent(true);
-        root.pad(20);
-        root.defaults().pad(10);
+        root.pad(20/2);
+        root.defaults().pad(10/2);
 
         stage.addActor(backgroundImage);
         stage.addActor(root);
@@ -95,17 +95,17 @@ public class PlayerSelectorScreen implements Screen {
         Label.LabelStyle descriptionStyle = new Label.LabelStyle(bitmapFontWithBorder, Color.WHITE);
         Label welcome = new Label("Willkommen in Catan, Abenteurer!", skin, "title");
         welcome.getStyle().fontColor = Color.WHITE;
-        welcome.setFontScale(2f);
+        welcome.setFontScale(1f);
         Label selectorDescription = new Label("Bitte tragt hier eure Namen ein und wählt eine Farbe:", descriptionStyle);
         selectorDescription.getStyle().fontColor = Color.WHITE;
-        selectorDescription.setFontScale(1f);
+        selectorDescription.setFontScale(0.5f);
         selectorDescription.setAlignment(Align.center);
-        root.add(welcome).padBottom(40).row();
-        root.add(selectorDescription).padBottom(50);
+        root.add(welcome).padBottom(40/2).row();
+        root.add(selectorDescription).padBottom(50/2);
         root.row();
         
         Label playerCounterDescription = new Label("Anzahl Spieler:", descriptionStyle);
-        selectorDescription.setFontScale(1f);
+        selectorDescription.setFontScale(0.5f);
 
         SelectBox<Integer> playerCountBox = new SelectBox<>(skin);
         playerCountBox.setItems(2, 3, 4);
@@ -115,7 +115,7 @@ public class PlayerSelectorScreen implements Screen {
         root.add(playerCountRow).center().row();
 
         Table playerContainer = new Table();
-        playerContainer.defaults().pad(40).top().left();
+        playerContainer.defaults().pad(40/2).top().left();
         root.add(playerContainer).colspan(2).row();
 
         playerCountBox.addListener(new ChangeListener() {
@@ -139,6 +139,7 @@ public class PlayerSelectorScreen implements Screen {
         customButtonStyle.font = bitmapFont;
 
         TextButton backButton = new TextButton("Zurück zum Hauptmenü", customButtonStyle);
+        backButton.getLabel().setFontScale(0.5f);
         backButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
@@ -150,6 +151,7 @@ public class PlayerSelectorScreen implements Screen {
         backButton.getLabel().setFontScale(1f);
 
         startButton = new TextButton("Spiel starten", customButtonStyle);
+        startButton.getLabel().setFontScale(0.5f);
         startButton.setDisabled(true);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
@@ -175,9 +177,9 @@ public class PlayerSelectorScreen implements Screen {
 
 
         root.row();
-        root.add(startButton).width(560).height(80).padTop(200);
+        root.add(startButton).width(560/2).height(80/2).padTop(200/2);
         root.row();
-        root.add(backButton).width(560).height(80);
+        root.add(backButton).width(560/2).height(80/2);
 
     }
 
@@ -192,24 +194,25 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
 
             Label playerLabel = new Label("Spieler " + (i + 1), skin);
             playerLabel.getStyle().fontColor = Color.WHITE;
-            playerLabel.setFontScale(1.5f);
+            playerLabel.setFontScale(0.75f);
 
             TextField nameField = new TextField("",skin);
             nameField.setMessageText("Spielername");
-            nameField.setSize(250, 40);
+            nameField.setSize(250/2, 40/2);
 
             Label colorLabel = new Label("Farbe: ", skin);
             colorLabel.getStyle().fontColor = Color.WHITE;
-            colorLabel.setFontScale(1.5f);
+            colorLabel.setFontScale(0.75f);
             ButtonGroup<TextButton> colorButtons = new ButtonGroup<>();
             Table colorTable = new Table();
-            colorTable.defaults().padRight(5);
+            colorTable.defaults().padRight(3);
 
             List<TextButton> thisPlayersColorButtons = new ArrayList<>();
 
             for (Color color : availableColors) {
                 TextButton colorButton = new TextButton("", skin);
                 colorButton.setColor(color);
+                colorButton.getLabel().setFontScale(0.5f);
                 thisPlayersColorButtons.add(colorButton);
 
                 colorButton.addListener(new ChangeListener() {
@@ -225,7 +228,7 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
 
             TextButton confirmButton = new TextButton("Spieler festlegen", skin);
             confirmButton.getLabel().setColor(Color.WHITE);
-            confirmButton.getLabel().setFontScale(1.5f);
+            confirmButton.getLabel().setFontScale(0.5f);
             confirmButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
@@ -274,12 +277,12 @@ private void buildPlayerInputs(Table container, int selectedPlayerCount) {
             });
 
             playerTable.add(playerLabel).left().row();
-            playerTable.add(nameField).width(300).padTop(10).row();
-            playerTable.add(colorLabel).padTop(40).left().row();
-            playerTable.add(colorTable).padTop(20).row();
-            playerTable.add(confirmButton).padTop(50).row();
+            playerTable.add(nameField).width(300/2).padTop(10/2).row();
+            playerTable.add(colorLabel).padTop(40/2).left().row();
+            playerTable.add(colorTable).padTop(20/2).row();
+            playerTable.add(confirmButton).padTop(50/2).row();
 
-            container.add(playerTable).padTop(50).left();
+            container.add(playerTable).padTop(50/2).left();
         }
     }
     @Override

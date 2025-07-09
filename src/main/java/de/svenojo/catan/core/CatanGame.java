@@ -2,6 +2,7 @@ package de.svenojo.catan.core;
 
 
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 
@@ -20,6 +21,11 @@ public class CatanGame extends Game {
     public void create() {
         catanAssetManager = new CatanAssetManager();
         catanAssetManager.initializeAssets();
+
+        Gdx.app.setLogLevel(Application.LOG_DEBUG);
+
+        System.out.println("=== Test System.out ===");
+        Gdx.app.log("DEBUG", "Test Gdx.app.log()");
 
         /**
          *  Blockiert den Thread bis alle Assets geladen sind

@@ -1,10 +1,7 @@
 package de.svenojo.catan.world.map;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 import java.util.Stack;
 
 import org.jgrapht.Graph;

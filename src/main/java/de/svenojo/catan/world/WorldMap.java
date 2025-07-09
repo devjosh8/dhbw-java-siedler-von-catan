@@ -313,11 +313,14 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     }
 
      /**
-     * @return Gibt die Node (Ecke) zurück, die aktuell unter der Maus ist
-     * ist gerade keine Ecke unter der Maus, so wird ein leeres Optional zurückgegeben
+     * @return Gibt die Edge (Kante) zurück, die aktuell unter der Maus ist
+     * ist gerade keine Kante unter der Maus, so wird ein leeres Optional zurückgegeben
      */
     public Optional<Edge> getCurrentlyHighlightedEdge() {
         return currentlyHighlightedEdge == null ? Optional.empty() : Optional.of(currentlyHighlightedEdge);
     }
 
+    public boolean isSomethingHighlighted() {
+        return currentlyHighlightedTile != null || currentlyHighlightedNode != null || currentlyHighlightedEdge != null;
+    }
 }

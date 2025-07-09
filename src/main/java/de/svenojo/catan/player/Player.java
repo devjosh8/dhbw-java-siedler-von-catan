@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Getter @Setter
-public class Player {
-    private int id;
-    
+public class Player {    
     private Color color;
     private String name;
 
@@ -18,7 +16,7 @@ public class Player {
     private int settlementAmount;
     private int cityAmount;
 
-    public Player(int id, String name, Color color) {
+    public Player(String name, Color color) {
         this.name = name;
         this.color = color;
 

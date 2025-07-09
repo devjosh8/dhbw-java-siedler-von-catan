@@ -53,7 +53,6 @@ public class MainMenuScreen implements Screen {
         
         Label introduction = new Label("Ein Land voller Möglichkeiten liegt vor euch - wild, unberührt und bereit, erobert zu werden. Erschließt mit Mut und Weitsicht das unentdeckte Land und nutzt eure Ressourcen weise, um Straßen zu bauen, Städte zu gründen und eure Macht auszudehnen. Nur wer klug entscheidet, geschickt verhandelt und mutig expandiert, wird auf Catan zur Legende.", introductionStyle);
         introduction.getStyle().fontColor = Color.WHITE;
-        introduction.setFontScale(0.5f);
         introduction.setAlignment(Align.center);
         introduction.setWrap(true);
         
@@ -68,7 +67,6 @@ public class MainMenuScreen implements Screen {
         customButtonStyle.font = bitmapFontWithoutBorder;
         
         TextButton startButton = new TextButton("Neues Spiel", customButtonStyle);
-        startButton.getLabel().setFontScale(0.5f);
         startButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
@@ -80,7 +78,6 @@ public class MainMenuScreen implements Screen {
 
 
         TextButton creditButton = new TextButton("Credits", customButtonStyle);
-        creditButton.getLabel().setFontScale(0.5f);
         creditButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
@@ -92,7 +89,6 @@ public class MainMenuScreen implements Screen {
 
 
         TextButton exitButton = new TextButton("Spiel verlassen", customButtonStyle);
-        exitButton.getLabel().setFontScale(0.5f);
         exitButton.addListener(event -> {
             if (event.toString().equals("touchDown")) {
                 clickSound.play();
@@ -108,13 +104,13 @@ public class MainMenuScreen implements Screen {
         Table root = new Table();
         root.setFillParent(true);
         root.center();
-        root.add(introduction).width(1500/2).padTop(150/2).padBottom(50/2);;
+        root.add(introduction).width(1500).padTop(150).padBottom(50);;
         root.row();
-        root.add(startButton).width(450/2).height(80/2);
+        root.add(startButton).width(450).height(80);
         root.row();
-        root.add(creditButton).width(450/2).height(80/2).padTop(20/2);
+        root.add(creditButton).width(450).height(80).padTop(20);
         root.row();
-        root.add(exitButton).width(450/2).height(80/2).padTop(20/2);
+        root.add(exitButton).width(450).height(80).padTop(20);
 
         stage.addActor(backgroundImage);
         stage.addActor(root);

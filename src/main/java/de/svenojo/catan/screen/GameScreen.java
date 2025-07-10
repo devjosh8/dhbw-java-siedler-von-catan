@@ -93,10 +93,11 @@ public class GameScreen implements Screen {
         catanGameLogic = new CatanGameLogic(playerOptions.getplayerList(), worldMap);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
-        inputMultiplexer.addProcessor(new PlacementInputProcessor(catanGameLogic, worldMap));
+        PlacementInputProcessor placementInputProcessor = new PlacementInputProcessor(catanGameLogic, worldMap);
+        inputMultiplexer.addProcessor(placementInputProcessor);
         inputMultiplexer.addProcessor(cameraInputController);
         //TODO: add game ui input processor
-        Gdx.input.setInputProcessor(cameraInputController);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     private void doneLoading() {

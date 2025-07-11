@@ -9,6 +9,8 @@ import de.svenojo.catan.world.building.BuildingType;
 import de.svenojo.catan.world.building.buildings.BuildingCity;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
+import de.svenojo.catan.world.material.MaterialType;
+import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.util.HighlightingType;
 import lombok.Getter;
 import lombok.Setter;
@@ -81,8 +83,26 @@ public class CatanGameLogic {
             nextPlayer();
     }
 
+    public void letCurrentUserPlaceRobber() {
+        worldMap.setHighlightingType(HighlightingType.TILE);
+        playerPlacingBuilding = true;
+    }
+
     public void letCurrentUserPlaceBuilding(BuildingType buildingType) {
-        worldMap.setHighlightingType(HighlightingType.NODE);
+
+        switch (buildingType) {
+            case CITY:
+                worldMap.setHighlightingType(HighlightingType.NODE);
+                break;
+        
+            case SETTLEMENT:
+                worldMap.setHighlightingType(HighlightingType.NODE);
+                break;
+            case STREET:
+                worldMap.setHighlightingType(HighlightingType.EDGE);
+            break;
+        }
+        
         playerPlacingBuilding = true;
         playerPlacingBuildingType = buildingType;
     }
@@ -113,6 +133,17 @@ public class CatanGameLogic {
             case MATERIAL_DISTRIBUTION:
                 if (this.rolledNumber == 7)
                     break;
+
+                // Annahme rolled number ist zahl => herausfinden, welches feld diese zahl hat
+                for(Tile tile : worldMap.getMapTiles()) {
+                    if(tile.getNumberValue() == this.rolledNumber) {
+                        MaterialType materialToGivePlayers = tile.getWorldTileType().getMaterialType();
+                        for(Player p : players) {
+                            p.addMaterial(materialToGivePlayers, 1);
+                        }
+                        break;
+                    }
+                }
                 break;
             case ROBBER:
                 if (this.rolledNumber != 7)

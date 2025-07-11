@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class GameUI {
 
-    private Stage stage;
+    private Stage stage; 
     private Skin skin;
 
     private Label currentPlayerLabel;

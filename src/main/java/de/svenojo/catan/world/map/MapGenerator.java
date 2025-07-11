@@ -1,16 +1,24 @@
 package de.svenojo.catan.world.map;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Stack;
+import java.util.function.Consumer;
 
 import org.jgrapht.Graph;
+import org.jgrapht.Graphs;
+import org.jgrapht.graph.DefaultEdge;
 
 import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.Node;
+import de.svenojo.catan.world.WorldMap;
+import de.svenojo.catan.world.building.buildings.BuildingHarbour;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileType;
 
@@ -77,7 +85,7 @@ public class MapGenerator {
      * @param nodes     Eine Leere Liste von Nodes, die durch die Methide gefüllt
      *                  wird
      */
-    public static void generateMap(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes) {
+    public static void generateMap(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes, WorldMap worldMap) {
         int mapRadius = 2;
 
         Stack<TileType> tileTypeStack = getTileTypeDistributionStack();
@@ -95,10 +103,10 @@ public class MapGenerator {
             }
         }
 
-        generateNodeGraph(mapTiles, nodeGraph, nodes);
+        generateNodeGraph(mapTiles, nodeGraph, nodes, worldMap);
     }
 
-    private static void generateNodeGraph(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes) {
+    private static void generateNodeGraph(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes, WorldMap worldMap) {
         Vector3[] positions = {
                 new Vector3(0, 0, -2),
                 new Vector3((float) Math.sqrt(3), 0, -1),
@@ -156,5 +164,35 @@ public class MapGenerator {
             }
             lastNode = null;
         }
+
+        for(Node node : nodes) {
+            if(nodeGraph.edgesOf(node).size() == 2) {
+                node.setOnEdge(true);
+                //worldMap.placeHarbour(new BuildingHarbour(null, node));
+            }
+        }
     }
+
+    public static void placeHarbours(Graph<Node, Edge> graph, Node start, WorldMap worldMap) {
+
+
+    for(Node node : graph.vertexSet()) {
+        if(!node.isOnEdge()) continue;
+
+        boolean placeHarbour = true;
+
+        for(Edge edge : graph.edgesOf(node)) {
+            Node neighbor = Graphs.getOppositeVertex(graph, edge, node);
+            if(!neighbor.isOnEdge()) continue;
+
+            // hat nachbar hafen
+            if(neighbor.hasHarbour()) {
+                placeHarbour = false;
+                break;
+            }
+        }
+
+        if(placeHarbour)worldMap.placeHarbour(new BuildingHarbour(null, node));
+    }
+}
 }

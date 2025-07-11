@@ -18,6 +18,7 @@ public class Tile {
 
     private int numberValue;
 
+
     public Tile(AxialVector position, TileType type, int numberValue) {
         this.axialPosition = position;
         this.worldTileType = type;

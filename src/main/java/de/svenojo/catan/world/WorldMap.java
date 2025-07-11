@@ -38,6 +38,7 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.bandit.Bandit;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingCalculator;
+import de.svenojo.catan.world.building.buildings.BuildingHarbour;
 import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
@@ -57,7 +58,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private List<Node> nodes;
     private Set<Building> buildings;
     private Graph<Node, Edge> nodeGraph;
-
 
     private CatanAssetManager catanAssetManager;
 
@@ -105,7 +105,14 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      * Generiert die Karte über die MapGenerator Klasse
      */
     public void generateMap() {
-        MapGenerator.generateMap(mapTiles, nodeGraph, nodes);
+        MapGenerator.generateMap(mapTiles, nodeGraph, nodes, this);
+
+        for(Node node : nodeGraph.vertexSet()) {
+            if(node.isOnEdge()) {
+                MapGenerator.placeHarbours(nodeGraph, node, this);
+                break;
+            }
+        }
     }
 
     public void loadAssets() {
@@ -139,6 +146,14 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         ModelInstance modelInstance = buildingCalculator.calculateBuildingModelInstance(player, building, nodeGraph);
         if(modelInstance != null) {
             buildings.add(building);
+            modelInstances.add(modelInstance);
+        }
+    }
+
+    public void placeHarbour(BuildingHarbour harbour) {
+        ModelInstance modelInstance = buildingCalculator.calculateHarbourModelInstance(harbour, nodeGraph);
+        if(modelInstance != null) {
+            buildings.add(harbour);
             modelInstances.add(modelInstance);
         }
     }

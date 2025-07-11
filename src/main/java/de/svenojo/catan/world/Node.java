@@ -14,11 +14,33 @@ public class Node {
 
     @Deprecated
     private int number;
+
+    private boolean isOnEdge;
+    private boolean hasHarbour;
     
     public Node(Vector3 position) {
         this.position = position;
         neighbourTiles = new HashSet<>();
         this.number = 0;
+        isOnEdge = false;
+        hasHarbour = false;
+    }
+
+    public void setHasHarbour(boolean hasHarbour) {
+        this.hasHarbour = hasHarbour;
+    }
+
+    public boolean hasHarbour() {
+        return hasHarbour;
+    }
+
+
+    public boolean isOnEdge() {
+        return isOnEdge;
+    }
+
+    public void setOnEdge(boolean isOnEdge) {
+        this.isOnEdge = isOnEdge;
     }
 
     public void setNumber(int number) {

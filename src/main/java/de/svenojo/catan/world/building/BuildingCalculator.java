@@ -16,6 +16,7 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.Node;
 import de.svenojo.catan.world.building.buildings.BuildingCity;
+import de.svenojo.catan.world.building.buildings.BuildingHarbour;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 
@@ -25,6 +26,30 @@ public class BuildingCalculator {
 
     public BuildingCalculator(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
+    }
+
+    public ModelInstance calculateHarbourModelInstance(BuildingHarbour building, Graph<Node, Edge> nodeGraph) {
+        ModelInstance instance = new ModelInstance(catanAssetManager.getModel(building.getBuildingType().getFileName()));
+        
+        Vector3 position = new Vector3();
+        instance = changeColor(instance, Color.valueOf("#2596be"));
+        NodeBuilding nodeBuilding = (NodeBuilding) building;
+
+        position.x = nodeBuilding.getPosition().getPosition().x;
+        position.z = nodeBuilding.getPosition().getPosition().z;
+
+        position.y = 0.07f;
+        instance.transform.setToTranslation(position);
+
+        float angle = (float) (Math.atan2( position.x, position.z) * 360/(2 * Math.PI));
+
+        angle+=90;
+
+        instance.transform.rotate(new Vector3(0, 1.0f, 0f), angle);
+        instance.transform.scale(0.01f, 0.01f, 0.01f);
+        building.getPosition().setHasHarbour(true);
+        return instance;
+
     }
 
     public ModelInstance calculateBuildingModelInstance(Player player, Building building, Graph<Node, Edge> nodeGraph) {

@@ -16,6 +16,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class CatanGameLogic {
+
+
+    // TODO: Phase hinzufügen, bei der mit Häfen getauscht werden kann
+    // in dieser Phase wird der Klick auf Nodes abgefangen -> dann überprüfen ob Node einen hafen hat & dem Spieler gehört
+    // dann kann er traden. die Phase kann mit einem Button übersprungen werden; bitte hinzufügen ~ josh
+
+
     enum GameState {
         PRE_GAME,
         SETTLE_PLAYERS,

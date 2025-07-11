@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -16,10 +17,13 @@ import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
 import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.logic.CatanGameLogic;
 import de.svenojo.catan.logic.PlacementInputProcessor;
+import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.MapWater;
+import de.svenojo.catan.world.Node;
 import de.svenojo.catan.world.WorldMap;
+import de.svenojo.catan.world.building.buildings.BuildingHarbour;
 import de.svenojo.util.PlayerOptions;
 
 public class GameScreen implements Screen {

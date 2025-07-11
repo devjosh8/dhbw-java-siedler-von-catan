@@ -16,6 +16,8 @@ public class Player {
     private int settlementAmount;
     private int cityAmount;
 
+    private MaterialContainer materialContainer;
+
     public Player(String name, Color color) {
         this.name = name;
         this.color = color;
@@ -24,5 +26,7 @@ public class Player {
         streetAmount = 0;
         settlementAmount = 0;
         cityAmount = 0;
+
+        materialContainer = new MaterialContainer();
     }
 }

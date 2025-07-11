@@ -2,6 +2,7 @@ package de.svenojo.catan.player;
 
 import com.badlogic.gdx.graphics.Color;
 
+import de.svenojo.catan.world.building.BuildingType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -28,5 +29,13 @@ public class Player {
         cityAmount = 0;
 
         materialContainer = new MaterialContainer();
+    }
+
+    public boolean canAfford(BuildingType type) {
+        return materialContainer.canAfford(type);
+    }
+
+    public int getTotalMaterialCount() {
+        return materialContainer.getTotalMaterialCount();
     }
 }

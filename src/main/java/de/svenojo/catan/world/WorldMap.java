@@ -67,12 +67,12 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private Bandit bandit;
 
     /**
-     *  für die Kollissionsberechnung benötigte Hilfsvariablen 
+     *  für die Kollisionsberechnung benötigte Hilfsvariablen 
      */
 
-    // Diese Variable kann verwendet werden, um zu setzen, welche Art von Kollissionen abgefangen werden soll
-    // Ist diese Variable auf NONE gesetzt, werden keine Kollissionen berechnet und es kommen auch keine an! (default ist NONE!)
-    // Für Annahme der Kollissionen die Getter unten verwenden
+    // Diese Variable kann verwendet werden, um zu setzen, welche Art von Kollisionen abgefangen werden soll
+    // Ist diese Variable auf NONE gesetzt, werden keine Kollisionen berechnet und es kommen auch keine an! (default ist NONE!)
+    // Für Annahme der Kollisionen die Getter unten verwenden
     private HighlightingType highlightingType;
 
     private Tile currentlyHighlightedTile = null; 

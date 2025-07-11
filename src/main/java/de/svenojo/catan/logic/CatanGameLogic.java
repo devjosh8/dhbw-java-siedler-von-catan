@@ -50,6 +50,7 @@ public class CatanGameLogic {
 
     @Getter @Setter
     private boolean playerPlacingBuilding = false;
+    private boolean playerPlacingRobber = false;
     private BuildingType playerPlacingBuildingType = null;
 
     private List<Player> players;
@@ -85,7 +86,7 @@ public class CatanGameLogic {
 
     public void letCurrentUserPlaceRobber() {
         worldMap.setHighlightingType(HighlightingType.TILE);
-        playerPlacingBuilding = true;
+        playerPlacingRobber = true;
     }
 
     public void letCurrentUserPlaceBuilding(BuildingType buildingType) {
@@ -108,6 +109,14 @@ public class CatanGameLogic {
     }
 
     public void onBuildingTouchDown() {
+        if(playerPlacingRobber) {
+            if(worldMap.getCurrentlyHighlightedTile().isPresent()) {
+                playerPlacingRobber = false;
+                worldMap.setHighlightingType(HighlightingType.NONE);
+                worldMap.placeBandit(worldMap.getCurrentlyHighlightedTile().get());
+            }
+            return;
+        }
         if (playerPlacingBuilding) {
             Building building = switch (playerPlacingBuildingType) {
                 case SETTLEMENT -> new BuildingSettlement(getCurrentPlayer(), worldMap.getCurrentlyHighlightedNode().get());

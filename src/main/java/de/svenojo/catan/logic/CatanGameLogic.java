@@ -154,10 +154,10 @@ public class CatanGameLogic {
     }
     
 
-    public void tradeWithBank(Player player, MaterialType geben, MaterialType bekommen) {
-        if(player.getMaterialCount(geben) >= 4) {
-            player.addMaterial(geben, -4);
-            player.addMaterial(bekommen, 1);
+    public void tradeWithBank(Player player, MaterialType typeToGive, MaterialType typeToReceive) {
+        if(player.getMaterialCount(typeToGive) >= 4) {
+            player.addMaterial(typeToGive, -4);
+            player.addMaterial(typeToReceive, 1);
         }
     }
     

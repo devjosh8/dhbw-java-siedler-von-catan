@@ -217,7 +217,7 @@ public class CatanGameLogic {
                     Gdx.app.log("DEBUG", "Cannot place street on edge: " + edge);
                     return;
                 }
-                // TODO: check if street connects to current players buildings
+                // TODO: check if street connects to current players buildings, return if not possible
             }
             if (building instanceof NodeBuilding) {
                 NodeBuilding nodeBuilding = (NodeBuilding) building;
@@ -225,6 +225,7 @@ public class CatanGameLogic {
                     Gdx.app.log("DEBUG", "Cannot place building on node: " + nodeBuilding);
                     return;
                 }
+                // TODO: check if node connects to the existing player buildings, return if not possible
             }
 
             worldMap.placeBuilding(getCurrentPlayer(), building);

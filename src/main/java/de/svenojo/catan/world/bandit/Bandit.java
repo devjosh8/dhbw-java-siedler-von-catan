@@ -1,5 +1,7 @@
 package de.svenojo.catan.world.bandit;
 
+import java.util.Optional;
+
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
@@ -13,7 +15,7 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.tile.Tile;
 
 public class Bandit {
-    
+
     private Tile position;
 
     private ModelInstance banditInstance;
@@ -26,10 +28,10 @@ public class Bandit {
 
     public void render(ModelBatch modelBatch) {
         modelBatch.render(banditInstance);
-    } 
+    }
 
-    public Tile getPosition() {
-        return position;
+    public Optional<Tile> getPosition() {
+        return (position == null) ? Optional.empty() : Optional.of(position);
     }
 
     public void setPosition(Tile position) {
@@ -47,20 +49,20 @@ public class Bandit {
 
     private ModelInstance changeColor(ModelInstance instance, Color color) {
         for (com.badlogic.gdx.graphics.g3d.model.Node node : instance.nodes) {
-                for (NodePart part : node.parts) {
-                    Material mat = part.material;
+            for (NodePart part : node.parts) {
+                Material mat = part.material;
 
-                    if (mat.has(ColorAttribute.Diffuse)) {
-                        ColorAttribute diffuse = (ColorAttribute) mat.get(ColorAttribute.Diffuse);
-                        diffuse.color.set(color);
-                    } else {
-                        mat.set(ColorAttribute.createDiffuse(color));
-                    }
-                    mat.set(ColorAttribute.createSpecular(Color.WHITE)); // oder z. B. Color.LIGHT_GRAY
-                    mat.set(FloatAttribute.createShininess(32f)); // Bereich: 0 (matt) – 128 (glänzend)
+                if (mat.has(ColorAttribute.Diffuse)) {
+                    ColorAttribute diffuse = (ColorAttribute) mat.get(ColorAttribute.Diffuse);
+                    diffuse.color.set(color);
+                } else {
+                    mat.set(ColorAttribute.createDiffuse(color));
                 }
+                mat.set(ColorAttribute.createSpecular(Color.WHITE)); // oder z. B. Color.LIGHT_GRAY
+                mat.set(FloatAttribute.createShininess(32f)); // Bereich: 0 (matt) – 128 (glänzend)
             }
+        }
 
-            return instance;
+        return instance;
     }
 }

@@ -3,6 +3,8 @@ package de.svenojo.catan.world.tile;
 import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;
+import lombok.Getter;
+import lombok.Setter;
 
 public class Tile {
 
@@ -17,7 +19,9 @@ public class Tile {
     private TileType worldTileType;
 
     private int numberValue;
-
+    @Getter
+    @Setter
+    private boolean robberPlaced = false;
 
     public Tile(AxialVector position, TileType type, int numberValue) {
         this.axialPosition = position;

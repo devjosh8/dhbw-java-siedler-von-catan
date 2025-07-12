@@ -45,6 +45,7 @@ import de.svenojo.catan.world.tile.TileHighlighter;
 import de.svenojo.catan.world.tile.TileMesh;
 import de.svenojo.catan.world.tile.TileType;
 import de.svenojo.catan.world.util.HighlightingType;
+import lombok.Getter;
 
 public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     
@@ -64,6 +65,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private BitmapFont bitmapFont;
 
     private BuildingCalculator buildingCalculator;
+    @Getter
     private Bandit bandit;
 
     /**
@@ -279,6 +281,9 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 float g = 52/255f;
                 float b = 22/255f;
                 bitmapFont.setColor(new Color(r, g, b, 1));
+            }
+            if (t.isRobberPlaced()) {
+                bitmapFont.setColor(Color.BLACK);
             }
 
             GlyphLayout layout = new GlyphLayout();

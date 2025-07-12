@@ -2,6 +2,7 @@ package de.svenojo.catan.logic;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 import de.svenojo.catan.player.Player;
@@ -60,6 +61,7 @@ public class CatanGameLogic {
     @Getter
     @Setter
     private boolean playerPlacingBuilding = false;
+    @Getter
     private boolean playerPlacingRobber = false;
     private BuildingType playerPlacingBuildingType = null;
     private Queue<BuildingType> buildingQueue = new LinkedList<>();
@@ -77,8 +79,7 @@ public class CatanGameLogic {
         this.currentPlayerIndex = 0;
         this.rolledNumber = -1; // No dice rolled yet
 
-        letCurrentPlayerPlaceBuilding(BuildingType.SETTLEMENT);
-        letCurrentPlayerPlaceBuilding(BuildingType.STREET);
+        letCurrentPlayerPlaceRobber();
     }
 
     public Player getCurrentPlayer() {
@@ -96,9 +97,11 @@ public class CatanGameLogic {
             nextPlayer();
     }
 
-    public void letCurrentUserPlaceRobber() {
+    public void letCurrentPlayerPlaceRobber() {
         worldMap.setHighlightingType(HighlightingType.TILE);
         playerPlacingRobber = true;
+
+        worldMap.getBandit().getPosition().ifPresent(previousTile -> previousTile.setRobberPlaced(false));
     }
 
     public void letCurrentPlayerPlaceBuilding(BuildingType buildingType) {
@@ -125,12 +128,14 @@ public class CatanGameLogic {
         return false;
     }
 
-    public void onBuildingTouchDown() {
+    public void onMouseTouchDown() {
         if(playerPlacingRobber) {
             if(worldMap.getCurrentlyHighlightedTile().isPresent()) {
                 playerPlacingRobber = false;
                 worldMap.setHighlightingType(HighlightingType.NONE);
-                worldMap.placeBandit(worldMap.getCurrentlyHighlightedTile().get());
+                Tile destinedTile = worldMap.getCurrentlyHighlightedTile().get();
+                destinedTile.setRobberPlaced(true);
+                worldMap.placeBandit(destinedTile);
             }
             return;
         }

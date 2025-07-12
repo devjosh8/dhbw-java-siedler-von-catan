@@ -1,17 +1,10 @@
 package de.svenojo.catan.world.map;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Stack;
-import java.util.function.Consumer;
-
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
-import org.jgrapht.graph.DefaultEdge;
-
 import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;

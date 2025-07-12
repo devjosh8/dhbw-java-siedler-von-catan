@@ -19,14 +19,15 @@ public class PlacementInputProcessor extends InputAdapter {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Gdx.app.log("DEBUG","PlacementInputProcessor.touchDown() called with button: " + button);
         if (button == Input.Buttons.LEFT) {
-            if (!catanGameLogic.isPlayerPlacingBuilding())
+            if (!catanGameLogic.isPlayerPlacingBuilding() && !catanGameLogic.isPlayerPlacingRobber()) {
                 return false;
+            }
             if (!worldMap.isSomethingHighlighted()) {
                 Gdx.app.log("DEBUG", "Nothing is highlighted");
                 return false;
             }
             Gdx.app.log("DEBUG", "Currently Highlighted Type is " + worldMap.getHighlightingType());
-            catanGameLogic.onBuildingTouchDown();
+            catanGameLogic.onMouseTouchDown();
             return true;
         }
         return false;

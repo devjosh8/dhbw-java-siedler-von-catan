@@ -5,10 +5,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+
 import de.svenojo.catan.player.Player;
+import de.svenojo.catan.screen.ui.GameUI;
+import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingType;
+import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingCity;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
@@ -20,20 +26,20 @@ import lombok.Setter;
 
 public class CatanGameLogic {
 
-
     // TODO: Phase hinzufügen, bei der mit Häfen getauscht werden kann
-    // in dieser Phase wird der Klick auf Nodes abgefangen -> dann überprüfen ob Node einen hafen hat & dem Spieler gehört
-    // dann kann er traden. die Phase kann mit einem Button übersprungen werden; bitte hinzufügen ~ josh
+    // in dieser Phase wird der Klick auf Nodes abgefangen -> dann überprüfen ob
+    // Node einen hafen hat & dem Spieler gehört
+    // dann kann er traden. die Phase kann mit einem Button übersprungen werden;
+    // bitte hinzufügen ~ josh
 
-
-    enum GameState {
+    public enum GameState {
         PRE_GAME,
         SETTLE_PLAYERS,
         GAME,
         GAME_ENDING
     }
 
-    enum RoundPhase {
+    public enum RoundPhase {
         DICE_ROLL,
         MATERIAL_DISTRIBUTION,
         ROBBER,
@@ -51,11 +57,14 @@ public class CatanGameLogic {
         }
     }
 
-    private WorldMap worldMap;
+    private final WorldMap worldMap;
+    private final GameUI gameUI;
 
     private final DiceRoll diceRoll = new DiceRoll();
 
+    @Getter
     private GameState currentGameState;
+    @Getter
     private RoundPhase currentRoundPhase;
 
     @Getter
@@ -71,15 +80,19 @@ public class CatanGameLogic {
 
     private int rolledNumber;
 
-    public CatanGameLogic(List<Player> players, WorldMap worldMap) {
+    public CatanGameLogic(List<Player> players, WorldMap worldMap, GameUI gameUI) {
         this.players = players;
         this.worldMap = worldMap;
-        this.currentGameState = GameState.PRE_GAME;
-        this.currentRoundPhase = RoundPhase.DICE_ROLL;
+        this.gameUI = gameUI;
+
+        Gdx.app.log("DEBUG", "CatanGameLogic initialized with players: " + players.size());
+
+        this.currentRoundPhase = null; // Will be set in playGameState()
         this.currentPlayerIndex = 0;
         this.rolledNumber = -1; // No dice rolled yet
 
-        letCurrentPlayerPlaceRobber();
+        // This will start the game in the PRE_GAME state and the render will pick it up
+        this.currentGameState = GameState.PRE_GAME;
     }
 
     public Player getCurrentPlayer() {
@@ -88,6 +101,35 @@ public class CatanGameLogic {
 
     public void nextPlayer() {
         this.currentPlayerIndex = (this.currentPlayerIndex + 1) % players.size();
+        gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+    }
+
+    private boolean firstSettleRoundComplete = false;
+
+    /**
+     * 
+     * @return true if the next player was set, false if the game state changed
+     */
+    public boolean nextPlayerDuringSettlementPhase() {
+        if (!firstSettleRoundComplete && (currentPlayerIndex < (players.size() - 1))) {
+            nextPlayer();
+            return true;
+        }
+        if (!firstSettleRoundComplete && (currentPlayerIndex == (players.size() - 1))) {
+
+            firstSettleRoundComplete = true;
+            // Last player can settle again
+            return true;
+        }
+        if (firstSettleRoundComplete && currentPlayerIndex == 0) {
+            // First player settled before, so we start the game now
+            currentGameState = GameState.GAME;
+            playGameState();
+            return false;
+        }
+        currentPlayerIndex = (currentPlayerIndex - 1);
+        gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+        return true;
     }
 
     public void nextRoundPhase() {
@@ -129,14 +171,15 @@ public class CatanGameLogic {
     }
 
     public void onMouseTouchDown() {
-        if(playerPlacingRobber) {
-            if(worldMap.getCurrentlyHighlightedTile().isPresent()) {
+        if (playerPlacingRobber) {
+            if (worldMap.getCurrentlyHighlightedTile().isPresent()) {
                 playerPlacingRobber = false;
                 worldMap.setHighlightingType(HighlightingType.NONE);
                 Tile destinedTile = worldMap.getCurrentlyHighlightedTile().get();
                 destinedTile.setRobberPlaced(true);
                 worldMap.placeBandit(destinedTile);
             }
+            nextRoundPhase();
             return;
         }
         if (playerPlacingBuilding) {
@@ -150,47 +193,79 @@ public class CatanGameLogic {
             if (building == null)
                 throw new Error("Building type " + playerPlacingBuildingType.toString() + "is not handled");
 
+            if (building instanceof BuildingStreet) {
+                Edge edge = worldMap.getCurrentlyHighlightedEdge().get();
+                if (!worldMap.canStreetBePlacedOnEdge(edge)) {
+                    Gdx.app.log("DEBUG", "Cannot place street on edge: " + edge);
+                    return;
+                }
+                // TODO: check if street connects to current players buildings
+            }
+            if (building instanceof NodeBuilding) {
+                NodeBuilding nodeBuilding = (NodeBuilding) building;
+                if (!worldMap.canNodeBuildingBePlaced(nodeBuilding)) {
+                    Gdx.app.log("DEBUG", "Cannot place building on node: " + nodeBuilding);
+                    return;
+                }
+            }
+
             worldMap.placeBuilding(getCurrentPlayer(), building);
             boolean finishedBuilding = letCurrentPlayerPlaceNextBuilding();
-            if (finishedBuilding) {
-                //Continue game loop
+            if (finishedBuilding && currentGameState.equals(GameState.SETTLE_PLAYERS)) {
+                boolean shouldLetSettle = nextPlayerDuringSettlementPhase();
+                if (shouldLetSettle)
+                    letCurrentPlayerSettle();
             }
         }
     }
-    
+
+    private void letCurrentPlayerSettle() {
+        letCurrentPlayerPlaceBuilding(BuildingType.SETTLEMENT);
+        letCurrentPlayerPlaceBuilding(BuildingType.STREET);
+    }
 
     public void tradeWithBank(Player player, MaterialType typeToGive, MaterialType typeToReceive) {
-        if(player.getMaterialCount(typeToGive) >= 4) {
+        if (player.getMaterialCount(typeToGive) >= 4) {
             player.addMaterial(typeToGive, -4);
             player.addMaterial(typeToReceive, 1);
         }
     }
-    
 
+    /**
+     * Plays the current round phase of the game logic.
+     * Once complete with the round phase, a method will change the current round
+     * phase and the {@link de.svenojo.catan.screen.GameScreen#render(float) Game
+     * Screen} will play the new round phase in the render method.
+     */
     public void playRoundPhase() {
         switch (currentRoundPhase) {
             case DICE_ROLL:
                 this.rolledNumber = diceRoll.rollBothDice();
+                gameUI.updateRolledNumber(this.rolledNumber);
+                nextRoundPhase();
                 break;
             case MATERIAL_DISTRIBUTION:
-                if (this.rolledNumber == 7)
+                if (this.rolledNumber == 7) {
+                    nextRoundPhase();
                     break;
-
+                }
                 // Annahme rolled number ist zahl => herausfinden, welches feld diese zahl hat
-                for(Tile tile : worldMap.getMapTiles()) {
-                    if(tile.getNumberValue() == this.rolledNumber) {
+                for (Tile tile : worldMap.getMapTiles()) {
+                    if (tile.getNumberValue() == this.rolledNumber) {
                         MaterialType materialToGivePlayers = tile.getWorldTileType().getMaterialType();
-                        for(Player p : players) {
+                        for (Player p : players) {
                             p.addMaterial(materialToGivePlayers, 1);
                         }
-                        break;
                     }
                 }
+                nextRoundPhase();
                 break;
             case ROBBER:
-                if (this.rolledNumber != 7)
+                if (this.rolledNumber != 7) {
+                    nextRoundPhase();
                     break;
-
+                }
+                letCurrentPlayerPlaceRobber();
                 break;
             case BUILD:
 
@@ -198,6 +273,37 @@ public class CatanGameLogic {
 
             default:
                 System.err.println("The current RoundPhase " + currentRoundPhase.toString() + " cannot be played.");
+                break;
+        }
+    }
+
+    /**
+     * Plays the current Game phase of the game logic depending on the State of the
+     * game.
+     * Once complete with the tasks of the game state, a method will change the
+     * current Game state and the
+     * {@link de.svenojo.catan.screen.GameScreen#render(float) Game
+     * Screen} will play the new game state in the render method.
+     */
+
+    public void playGameState() {
+        switch (currentGameState) {
+            case PRE_GAME:
+                // Players could be shuffled or try to roll higher than each other
+                gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+                currentGameState = GameState.SETTLE_PLAYERS;
+                break;
+            case SETTLE_PLAYERS:
+                // In this state, players are placing their first buildings
+                letCurrentPlayerSettle();
+                break;
+            case GAME:
+                // Starts the round loop
+                currentRoundPhase = RoundPhase.DICE_ROLL;
+                break;
+            case GAME_ENDING:
+            default:
+                System.err.println("The current GameState " + currentGameState.toString() + " cannot be played.");
                 break;
         }
     }

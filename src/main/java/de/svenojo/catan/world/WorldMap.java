@@ -38,7 +38,9 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.bandit.Bandit;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingCalculator;
+import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingHarbour;
+import de.svenojo.catan.world.building.buildings.BuildingStreet;
 import de.svenojo.catan.world.map.MapGenerator;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
@@ -163,7 +165,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     /**
      * Methode, die den Bandit auf der Karte platziert
-     * @param Das Tile auf dem der Bandit platziert werden soll
+     * @param tile Das Tile auf dem der Bandit platziert werden soll
      */
     public void placeBandit(Tile tile) {
         bandit.setPosition(tile);
@@ -356,5 +358,45 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
     public List<Tile> getMapTiles() {
         return mapTiles;
+    }
+
+    public boolean canNodeBuildingBePlaced(NodeBuilding nodeBuilding) {
+
+        boolean nodeIsOccupied = false;
+        boolean nodeOccupiedByCurrentPlayer = false;
+        for (Building building : buildings) {
+            if (!(building instanceof NodeBuilding)) continue;
+            NodeBuilding foundNodeBuilding = (NodeBuilding) building;
+            if (foundNodeBuilding.getPosition().equals(nodeBuilding.getPosition())) {
+                nodeIsOccupied = true; // There is already a building on this node
+                nodeOccupiedByCurrentPlayer = foundNodeBuilding.getPlayer().equals(nodeBuilding.getPlayer());
+                break; // No need to check further, we found a building on this node
+            }
+        }
+
+        
+
+        switch (nodeBuilding.getBuildingType()) {
+            case SETTLEMENT:
+                return !nodeIsOccupied;
+            case CITY:
+                return nodeIsOccupied && nodeOccupiedByCurrentPlayer; // A city can only be placed on a node with a settlement of the same player
+            case HARBOUR:
+            default:
+                return false;
+        }
+    }
+
+
+    public boolean canStreetBePlacedOnEdge(Edge edge) {
+        if(edge == null) return false;
+        for (Building building : buildings) {
+            if (!(building instanceof BuildingStreet)) continue;
+            BuildingStreet street = (BuildingStreet) building;
+            if (street.getPosition().equals(edge)) {
+                return false; // There is already a street on this edge
+            }
+        }
+        return true; // No street with this edge as position found
     }
 }

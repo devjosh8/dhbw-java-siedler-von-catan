@@ -81,7 +81,7 @@ public class GameScreen implements Screen {
         mapWater = new MapWater(catanAssetManager);
         assetsLoading = true;
 
-        catanGameLogic = new CatanGameLogic(playerOptions.getplayerList(), worldMap);
+        catanGameLogic = new CatanGameLogic(playerOptions.getplayerList(), worldMap, gameUI);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         PlacementInputProcessor placementInputProcessor = new PlacementInputProcessor(catanGameLogic, worldMap);
@@ -99,6 +99,8 @@ public class GameScreen implements Screen {
         assetsLoading = false;
     }
     
+    private CatanGameLogic.GameState lastGameState = null;
+    private CatanGameLogic.RoundPhase lastRoundPhase = null;
     @Override
     public void render(float delta) {
         if(assetsLoading && catanAssetManager.getAssetManager().update()) doneLoading();
@@ -119,6 +121,15 @@ public class GameScreen implements Screen {
         } 
 
         spriteBatch.end();
+
+        if (catanGameLogic.getCurrentGameState() != lastGameState) {
+            lastGameState = catanGameLogic.getCurrentGameState();
+            catanGameLogic.playGameState();
+        }
+        if (catanGameLogic.getCurrentRoundPhase() != lastRoundPhase) {
+            lastRoundPhase = catanGameLogic.getCurrentRoundPhase();
+            catanGameLogic.playRoundPhase();
+        }
 
         gameUI.render(delta);
     }

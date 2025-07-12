@@ -13,6 +13,7 @@ public class GameUI {
     private Skin skin;
 
     private Label currentPlayerLabel;
+    private Label rolledNumberLabel;
 
     public GameUI() {
         this.stage = new Stage(new ScreenViewport());
@@ -23,10 +24,19 @@ public class GameUI {
         stage.addActor(table);
         table.setDebug(true);
 
-        currentPlayerLabel = new Label("Aktueller Spieler: ", skin);
-        currentPlayerLabel.setFontScale(2.0f);
+        // Current Player Label
+        currentPlayerLabel = new Label("Spieler: ", skin);
+        currentPlayerLabel.setFontScale(1.5f);
+
+        // Rolled Number Label
+        rolledNumberLabel = new Label("Geworfene Zahl: ", skin);
+        rolledNumberLabel.setFontScale(2.0f);
         
         table.top().left().pad(10);
+        table.add(rolledNumberLabel)
+            .expandX()
+            .center()
+            .row();
         table.add(currentPlayerLabel)
             .width(500)
             .height(200)
@@ -38,7 +48,11 @@ public class GameUI {
     }
 
     public void updateCurrentPlayer(String currentPlayerDisplay) {
-        currentPlayerLabel.setText("Aktueller Speiler: " + currentPlayerDisplay);
+        currentPlayerLabel.setText("Spieler: " + currentPlayerDisplay);
+    }
+
+    public void updateRolledNumber(int rolledNumber) {
+        rolledNumberLabel.setText("Geworfene Zahl: " + rolledNumber);
     }
 
     public void render(float delta) {

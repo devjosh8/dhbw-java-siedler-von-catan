@@ -63,7 +63,9 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      */
     private List<Tile> mapTiles;
     private ArrayList<ModelInstance> modelInstances;
+    private ArrayList<ModelInstance> harbourModelInstances;
     private ArrayList<TileMesh> tileMeshes;
+    private ArrayList<TileMesh> harbourTileMeshes;
 
     private List<HarbourTile> harbourTiles;
 
@@ -96,13 +98,17 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private Edge currentlyHighlightedEdge;
     private ModelInstance highlightedEdgeModelInstance;
 
+    private HarbourTile currentlyHighlightedHarbourTile;
+
     public WorldMap(CatanAssetManager catanAssetManager) {
         this.catanAssetManager = catanAssetManager;
         this.bitmapFont = null;
         mapTiles = new ArrayList<>();
         modelInstances = new ArrayList<>();
         tileMeshes = new ArrayList<>();
+        harbourModelInstances = new ArrayList<>();
         nodes = new ArrayList<>();
+        harbourTileMeshes = new ArrayList<>();
         buildings = new HashSet<>();
         harbourTiles = new ArrayList<>();
         this.buildingCalculator = new BuildingCalculator(catanAssetManager);
@@ -179,12 +185,12 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             material.set(ColorAttribute.createSpecular(Color.BLACK));
             material.set(FloatAttribute.createShininess(2f));
 
-            modelInstances.add(modelInstance);
+            harbourModelInstances.add(modelInstance);
 
             TileMesh tileMesh = new TileMesh();
             tileMesh.setHexagonTriangles(harbour.getWorldPosition(), Tile.WORLD_TILE_DISTANCE);
-            tileMeshes.add(tileMesh);
-
+            harbourTileMeshes.add(tileMesh);
+            
             i++;
         }
     }
@@ -249,6 +255,8 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             }
 
             case NODE: {
+                
+
                 for(Node node : getNodeGraph().vertexSet()) {
 
                     Vector3 hitpoint = Vector3.Zero;
@@ -297,27 +305,41 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 currentlyHighlightedEdge = null;
                 break;
             }
+
+            case HARBOUR: {
+                int raycastHitMeshIndex = 0;
+                for(TileMesh currentTileMesh : harbourTileMeshes) {
+                    
+                    Vector3 hitpoint = Vector3.Zero;
+                    if(currentTileMesh.rayIntersectsHex(ray, hitpoint)) {
+                        raycastHit = true;
+                        break;
+                    }
+                    raycastHitMeshIndex++;
+                }
+
+                if(raycastHit) {
+                    ModelInstance a = harbourModelInstances.get(raycastHitMeshIndex);
+                    TileHighlighter.setModelInstanceHighlightTemporarily(a);
+                    currentlyHighlightedHarbourTile = harbourTiles.get(raycastHitMeshIndex);
+                } else {
+                    currentlyHighlightedHarbourTile = null;
+                }
+                
+                modelBatch.render(harbourModelInstances, environment);
+                break;
+            }
         }
     }   
-
-    private static float[] harbourRotationsa = new float[] {
-            -60.0f,
-            0.0f,
-            -120.0f,
-            -180.0f,
-            -240.0f,
-            -300.0f,
-        };
 
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
         bandit.render(modelBatch);
         highlightObjectUnderMouse(modelBatch, environment);
         modelBatch.render(modelInstances, environment);
+        modelBatch.render(harbourModelInstances, environment);
 
         // Häfen Bilder rendern
-
-        int i = 0;
         for(HarbourTile harbour : harbourTiles) {
             ModelBuilder modelBuilder = new ModelBuilder();
 
@@ -344,12 +366,9 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             ModelInstance rectInstance = new ModelInstance(texturedRectModel);
             rectInstance.transform.setToTranslation(harbour.getWorldPosition().cpy().add(0, 0.25f, 0));  // Position im 3D-Raum
             rectInstance.transform.rotate(Vector3.X, 180f);        // Rotation (optional)
-            //rectInstance.transform.rotate(Vector3.Y, harbourRotationsa[i]);
-            //rectInstance.transform.translate(1, 0, 0);
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             modelBatch.render(rectInstance);
-            i++;
         }
 
         Gdx.gl.glDisable(GL20.GL_BLEND);
@@ -421,6 +440,10 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      */
     public Optional<Tile> getCurrentlyHighlightedTile() {
         return currentlyHighlightedTile == null ? Optional.empty() : Optional.of(currentlyHighlightedTile);
+    }
+
+    public Optional<Tile> getCurrentlyHighlightedHarbour() {
+        return currentlyHighlightedHarbourTile == null ? Optional.empty() : Optional.of(currentlyHighlightedHarbourTile);
     }
 
     /**

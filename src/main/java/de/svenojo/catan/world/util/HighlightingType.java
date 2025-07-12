@@ -7,7 +7,8 @@ public enum HighlightingType {
     NONE,
     TILE,
     NODE,
-    EDGE;
+    EDGE,
+    HARBOUR;
 
     public static HighlightingType fromBuildingType(BuildingType buildingType) {
         return switch (buildingType) {

@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.badlogic.gdx.math.Vector3;
 
+import de.svenojo.catan.world.tile.HarbourTile;
 import de.svenojo.catan.world.tile.Tile;
 
 public class Node {
@@ -65,5 +66,12 @@ public class Node {
     
     public int getNumber() {
         return number;
+    }
+
+    public boolean isOnHarbour(HarbourTile harbourTile) {
+        if(getPosition().dst(harbourTile.getWorldPosition()) <= 2f) {
+            return true;
+        }
+        return false;
     }
 }

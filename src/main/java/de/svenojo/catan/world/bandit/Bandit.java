@@ -36,11 +36,11 @@ public class Bandit {
 
     public void setPosition(Tile position) {
         ModelInstance instance = new ModelInstance(catanAssetManager.getModel("data/models/bandit.g3db"));
-        instance = changeColor(instance, Color.WHITE);
+        instance = changeColor(instance, Color.GRAY);
         Vector3 pos = new Vector3();
         pos.x = position.getWorldPosition().x;
         pos.z = position.getWorldPosition().z;
-        pos.y = 0.5f;
+        pos.y = 0.2f;
         instance.transform.setToTranslation(pos);
         instance.transform.scale(0.004f, 0.004f, 0.004f);
         banditInstance = instance;

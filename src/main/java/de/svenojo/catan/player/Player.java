@@ -34,7 +34,9 @@ public class Player {
 
         materialContainer = new MaterialContainer();
     }
-
+    public String getName() {
+        return name;
+    }
     public String getColorString() {
          if (color.equals(Color.RED)) {
             return "Red";

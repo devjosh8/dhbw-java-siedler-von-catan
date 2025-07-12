@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.google.common.eventbus.EventBus;
 
 import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.logic.CatanGameLogic;
@@ -41,6 +42,7 @@ public class GameScreen implements Screen {
     private CatanGame catanGame;
     private CatanGameLogic catanGameLogic;
 
+    private EventBus gameScreenEventBus = new EventBus();
 
     private GameUI gameUI;
 
@@ -72,7 +74,7 @@ public class GameScreen implements Screen {
         
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
 
-        gameUI = new GameUI();
+        gameUI = new GameUI(gameScreenEventBus);
 
         catanAssetManager = catanGame.getCatanAssetManager();
 
@@ -81,7 +83,7 @@ public class GameScreen implements Screen {
         mapWater = new MapWater(catanAssetManager);
         assetsLoading = true;
 
-        catanGameLogic = new CatanGameLogic(playerOptions.getplayerList(), worldMap, gameUI);
+        catanGameLogic = new CatanGameLogic(playerOptions.getplayerList(), worldMap, gameUI, gameScreenEventBus);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         PlacementInputProcessor placementInputProcessor = new PlacementInputProcessor(catanGameLogic, worldMap);

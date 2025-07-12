@@ -7,7 +7,10 @@ import java.util.Queue;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.google.common.eventbus.EventBus;
+import com.google.common.eventbus.Subscribe;
 
+import de.svenojo.catan.logic.events.EndTurnEvent;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.Edge;
@@ -59,6 +62,7 @@ public class CatanGameLogic {
 
     private final WorldMap worldMap;
     private final GameUI gameUI;
+    private final EventBus gameScreenEventBus;
 
     private final DiceRoll diceRoll = new DiceRoll();
 
@@ -80,10 +84,13 @@ public class CatanGameLogic {
 
     private int rolledNumber;
 
-    public CatanGameLogic(List<Player> players, WorldMap worldMap, GameUI gameUI) {
+    public CatanGameLogic(List<Player> players, WorldMap worldMap, GameUI gameUI, EventBus gameScreenEventBus) {
         this.players = players;
         this.worldMap = worldMap;
         this.gameUI = gameUI;
+        this.gameScreenEventBus = gameScreenEventBus;
+
+        gameScreenEventBus.register(this);
 
         Gdx.app.log("DEBUG", "CatanGameLogic initialized with players: " + players.size());
 
@@ -138,6 +145,7 @@ public class CatanGameLogic {
         currentRoundPhase = result.getNextPhase();
         if (result.isFullRoundCompleted())
             nextPlayer();
+            gameUI.getEndTurnButton().setVisible(false); // Hide the button after the round is done
     }
 
     public void letCurrentPlayerPlaceRobber() {
@@ -232,6 +240,12 @@ public class CatanGameLogic {
         }
     }
 
+    @Subscribe
+    public void onEndTurnEvent(EndTurnEvent event) { 
+        Gdx.app.log("DEBUG", "EndTurnEvent received");
+        nextRoundPhase();
+    }
+
     /**
      * Plays the current round phase of the game logic.
      * Once complete with the round phase, a method will change the current round
@@ -280,7 +294,9 @@ public class CatanGameLogic {
                 letCurrentPlayerPlaceRobber();
                 break;
             case BUILD:
-
+                // just skip for now
+                //nextRoundPhase();
+                gameUI.getEndTurnButton().setVisible(true);
                 break;
 
             default:

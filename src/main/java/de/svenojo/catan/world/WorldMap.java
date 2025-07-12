@@ -114,7 +114,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
 
         for(Node node : nodeGraph.vertexSet()) {
             if(node.isOnEdge()) {
-                MapGenerator.placeHarbours(nodeGraph, node, this);
+                //MapGenerator.placeHarbours(nodeGraph, node, this);
                 break;
             }
         }
@@ -169,6 +169,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      * @param tile Das Tile auf dem der Bandit platziert werden soll
      */
     public void placeBandit(Tile tile) {
+        if(tile.getWorldTileType() == TileType.HARBOUR) return;
         bandit.setPosition(tile);
     }
 

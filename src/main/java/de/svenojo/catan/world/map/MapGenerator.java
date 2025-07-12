@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Stack;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
+
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial.MaterialType;
 import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;
@@ -12,6 +15,7 @@ import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.Node;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.buildings.BuildingHarbour;
+import de.svenojo.catan.world.tile.HarbourTile;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileType;
 
@@ -66,6 +70,29 @@ public class MapGenerator {
         return tileNumberStack;
     }
 
+    private static final AxialVector[] harborPositions = new AxialVector[] {
+        new AxialVector(2, 1),  // Nordwesten
+        new AxialVector(3, -2),  // Nordwesten
+        new AxialVector(-1, 3),  // Nordwesten
+        new AxialVector(-3, 2),  // Nordwesten
+        new AxialVector(-2, -1),  // Nordwesten
+        new AxialVector(1, -3),  // Nordwesten
+    };
+
+    private static final de.svenojo.catan.world.material.MaterialType[] harbourTilesMaterials = new de.svenojo.catan.world.material.MaterialType[] {
+        de.svenojo.catan.world.material.MaterialType.CLAY,
+         de.svenojo.catan.world.material.MaterialType.NONE,
+          de.svenojo.catan.world.material.MaterialType.WHEAT,
+           de.svenojo.catan.world.material.MaterialType.ORE,
+            de.svenojo.catan.world.material.MaterialType.WOOL,
+             de.svenojo.catan.world.material.MaterialType.WOOD,
+    };
+
+    private static final float[] rotations = new float[] {
+        0.0f,
+    };
+
+
     /**
      * Generiert die Karte für das Spiel, dazu den NodeGraph und befüllt alle
      * Argumente mit Inhalt
@@ -78,7 +105,7 @@ public class MapGenerator {
      * @param nodes     Eine Leere Liste von Nodes, die durch die Methide gefüllt
      *                  wird
      */
-    public static void generateMap(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes, WorldMap worldMap) {
+    public static void generateMap(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes, WorldMap worldMap, List<HarbourTile> harbourTiles) {
         int mapRadius = 2;
 
         Stack<TileType> tileTypeStack = getTileTypeDistributionStack();
@@ -97,6 +124,12 @@ public class MapGenerator {
         }
 
         generateNodeGraph(mapTiles, nodeGraph, nodes, worldMap);
+
+        for (int i = 0; i < harborPositions.length; i += 1) {
+            AxialVector harbourPos = harborPositions[i];
+            HarbourTile harbour = new HarbourTile(harbourPos, 0, harbourTilesMaterials[i]);
+            harbourTiles.add(harbour);
+        }
     }
 
     private static void generateNodeGraph(List<Tile> mapTiles, Graph<Node, Edge> nodeGraph, List<Node> nodes, WorldMap worldMap) {

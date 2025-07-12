@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 import org.jgrapht.Graph;
@@ -13,6 +14,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
@@ -25,14 +27,17 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.FloatAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
+import com.badlogic.gdx.utils.Array;
 
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
+import de.svenojo.catan.math.AxialVector;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.bandit.Bandit;
@@ -43,6 +48,7 @@ import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingHarbour;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 import de.svenojo.catan.world.map.MapGenerator;
+import de.svenojo.catan.world.tile.HarbourTile;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.tile.TileHighlighter;
 import de.svenojo.catan.world.tile.TileMesh;
@@ -58,6 +64,8 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     private List<Tile> mapTiles;
     private ArrayList<ModelInstance> modelInstances;
     private ArrayList<TileMesh> tileMeshes;
+
+    private List<HarbourTile> harbourTiles;
 
     private List<Node> nodes;
     private Set<Building> buildings;
@@ -96,6 +104,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         tileMeshes = new ArrayList<>();
         nodes = new ArrayList<>();
         buildings = new HashSet<>();
+        harbourTiles = new ArrayList<>();
         this.buildingCalculator = new BuildingCalculator(catanAssetManager);
         bandit = new Bandit(catanAssetManager);
 
@@ -110,7 +119,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
      * Generiert die Karte über die MapGenerator Klasse
      */
     public void generateMap() {
-        MapGenerator.generateMap(mapTiles, nodeGraph, nodes, this);
+        MapGenerator.generateMap(mapTiles, nodeGraph, nodes, this, harbourTiles);
 
         for(Node node : nodeGraph.vertexSet()) {
             if(node.isOnEdge()) {
@@ -145,6 +154,39 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             }
         }
         bitmapFont = catanAssetManager.worldMapIslandNumberFont;
+
+        float[] harbourRotations = new float[] {
+            -60.0f,
+            0.0f,
+            -120.0f,
+            -180.0f,
+            -240.0f,
+            -300.0f,
+        };
+        int i = 0;
+        for(Tile harbour : harbourTiles) {
+            Model worldTileModel = catanAssetManager.getAssetManager().get(harbour.getWorldTileType().getFileName(), Model.class);
+            ModelInstance modelInstance = new ModelInstance(worldTileModel);
+
+            modelInstance.transform.setToTranslation(harbour.getWorldPosition().x, 0, harbour.getWorldPosition().z);
+            modelInstance.transform.rotate(new Vector3(0, 1.0f, 0f), harbourRotations[i]);
+            modelInstance.transform.scale(Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE, Tile.WORLD_TILE_SCALE);
+
+
+            // Specular Map neu machen, damit die Map nicht mehr so glänzt
+            Material material = modelInstance.materials.get(0);
+            material.remove(ColorAttribute.Specular);
+            material.set(ColorAttribute.createSpecular(Color.BLACK));
+            material.set(FloatAttribute.createShininess(2f));
+
+            modelInstances.add(modelInstance);
+
+            TileMesh tileMesh = new TileMesh();
+            tileMesh.setHexagonTriangles(harbour.getWorldPosition(), Tile.WORLD_TILE_DISTANCE);
+            tileMeshes.add(tileMesh);
+
+            i++;
+        }
     }
 
     public void placeBuilding(Player player, Building building) {
@@ -256,13 +298,62 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 break;
             }
         }
-    }
+    }   
+
+    private static float[] harbourRotationsa = new float[] {
+            -60.0f,
+            0.0f,
+            -120.0f,
+            -180.0f,
+            -240.0f,
+            -300.0f,
+        };
 
     @Override
     public void render(ModelBatch modelBatch, Environment environment) {
         bandit.render(modelBatch);
         highlightObjectUnderMouse(modelBatch, environment);
         modelBatch.render(modelInstances, environment);
+
+        // Häfen Bilder rendern
+
+        int i = 0;
+        for(HarbourTile harbour : harbourTiles) {
+            ModelBuilder modelBuilder = new ModelBuilder();
+
+            Material material = new Material(
+                TextureAttribute.createDiffuse(catanAssetManager.getTexture(harbour.getMaterialType().getFileName())),// Textur als "Haut"
+                new BlendingAttribute(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA)
+            );
+
+            long attributes = VertexAttributes.Usage.Position |
+                            VertexAttributes.Usage.Normal |
+                            VertexAttributes.Usage.TextureCoordinates;
+
+            Model texturedRectModel = modelBuilder.createRect(
+                -0.9f, 0f, -0.9f,  // Bottom Left (x, y, z)
+                0.9f, 0f, -0.9f,  // Bottom Right
+                0.9f, 0f,  0.9f,  // Top Right
+                -0.9f, 0f,  0.9f,  // Top Left
+                0f, 1f, 0f,       // Normal (nach oben, +Y)
+                material,
+                attributes
+            );
+
+
+            ModelInstance rectInstance = new ModelInstance(texturedRectModel);
+            rectInstance.transform.setToTranslation(harbour.getWorldPosition().cpy().add(0, 0.25f, 0));  // Position im 3D-Raum
+            rectInstance.transform.rotate(Vector3.X, 180f);        // Rotation (optional)
+            //rectInstance.transform.rotate(Vector3.Y, harbourRotationsa[i]);
+            //rectInstance.transform.translate(1, 0, 0);
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            modelBatch.render(rectInstance);
+            i++;
+        }
+
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+        
     }
 
     /**
@@ -296,6 +387,11 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 bitmapFont.draw(spriteBatch, String.valueOf(tileNumberValue), screenCoords.x - layout.width / 2, screenCoords.y + layout.height / 2);
             }
             bitmapFont.setColor(Color.WHITE);
+
+
+            for(HarbourTile tile : harbourTiles) {
+
+            }
         }
     }
 

@@ -10,6 +10,9 @@ import com.badlogic.gdx.Gdx;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import de.svenojo.catan.logic.events.BuildCityEvent;
+import de.svenojo.catan.logic.events.BuildSettlementEvent;
+import de.svenojo.catan.logic.events.BuildStreetEvent;
 import de.svenojo.catan.logic.events.EndTurnEvent;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.screen.ui.GameUI;
@@ -108,7 +111,7 @@ public class CatanGameLogic {
 
     public void nextPlayer() {
         this.currentPlayerIndex = (this.currentPlayerIndex + 1) % players.size();
-        gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+        gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), getCurrentPlayer().getColorString());
         gameUI.updateMaterials(getCurrentPlayer().getMaterials());
     }
 
@@ -136,7 +139,7 @@ public class CatanGameLogic {
             return false;
         }
         currentPlayerIndex = (currentPlayerIndex - 1);
-        gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+        gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), getCurrentPlayer().getColorString());
         return true;
     }
 
@@ -145,7 +148,8 @@ public class CatanGameLogic {
         currentRoundPhase = result.getNextPhase();
         if (result.isFullRoundCompleted())
             nextPlayer();
-            gameUI.getEndTurnButton().setVisible(false); // Hide the button after the round is done
+        gameUI.getEndTurnButton().setVisible(false); // Hide the button after the round is done
+        gameUI.getButtonTable().setVisible(false);
     }
 
     public void letCurrentPlayerPlaceRobber() {
@@ -241,9 +245,52 @@ public class CatanGameLogic {
     }
 
     @Subscribe
-    public void onEndTurnEvent(EndTurnEvent event) { 
+    public void onEndTurnEvent(EndTurnEvent event) {
         Gdx.app.log("DEBUG", "EndTurnEvent received");
+        if (!buildingQueue.isEmpty() || playerPlacingBuilding) {
+            return; // Player still has buildings to place
+        }
         nextRoundPhase();
+    }
+
+    @Subscribe
+    public void onBuildSettlementEvent(BuildSettlementEvent event) {
+        handleTryToBuildEvent(BuildingType.SETTLEMENT);
+    }
+
+    @Subscribe
+    public void onBuildCityEvent(BuildCityEvent event) {
+        handleTryToBuildEvent(BuildingType.CITY);
+    }
+
+    @Subscribe
+    public void onBuildStreetEvent(BuildStreetEvent event) {
+        handleTryToBuildEvent(BuildingType.STREET);
+    }
+
+    public void handleTryToBuildEvent(BuildingType type) {
+        Player currentPlayer = getCurrentPlayer();
+        if (!currentPlayer.canAfford(type)) {
+            Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot afford building: " + type);
+            return;
+        }
+        if (type == BuildingType.CITY && currentPlayer.getCityAmount() >= 4) {
+            Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 4 cities");
+            return;
+        }
+        if (type == BuildingType.SETTLEMENT && currentPlayer.getSettlementAmount() >= 5) {
+            Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 5 settlements");
+            return;
+        }
+        if (type == BuildingType.STREET && currentPlayer.getStreetAmount() >= 15) {
+            Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 15 streets");
+            return;
+        }
+
+        currentPlayer.removeMaterialForBuilding(type);
+        gameUI.updateMaterials(getCurrentPlayer().getMaterials());
+
+        letCurrentPlayerPlaceBuilding(type);
     }
 
     /**
@@ -264,10 +311,12 @@ public class CatanGameLogic {
                     nextRoundPhase();
                     break;
                 }
-                // Annahme rolled number ist zahl => herausfinden, welches feld diese zahl hat
+                // Annahme rolled number ist zahl => herausfinden, welches Feld diese zahl hat
                 for (Tile tile : worldMap.getMapTiles()) {
-                    if (tile.getNumberValue() != this.rolledNumber) continue;
-                    if (tile.isRobberPlaced()) continue;
+                    if (tile.getNumberValue() != this.rolledNumber)
+                        continue;
+                    if (tile.isRobberPlaced())
+                        continue;
 
                     MaterialType materialToGivePlayers = tile.getWorldTileType().getMaterialType();
 
@@ -279,7 +328,8 @@ public class CatanGameLogic {
                             case CITY -> 2;
                             default -> 0;
                         };
-                        Gdx.app.log("DEBUG", "Giving " + amount + " " + materialToGivePlayers.name() + " to player: " + player.getName());
+                        Gdx.app.log("DEBUG", "Giving " + amount + " " + materialToGivePlayers.name() + " to player: "
+                                + player.getName());
                         player.addMaterial(materialToGivePlayers, amount);
                     }
                 }
@@ -294,8 +344,7 @@ public class CatanGameLogic {
                 letCurrentPlayerPlaceRobber();
                 break;
             case BUILD:
-                // just skip for now
-                //nextRoundPhase();
+                gameUI.getButtonTable().setVisible(true);
                 gameUI.getEndTurnButton().setVisible(true);
                 break;
 
@@ -318,7 +367,7 @@ public class CatanGameLogic {
         switch (currentGameState) {
             case PRE_GAME:
                 // Players could be shuffled or try to roll higher than each other
-                gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+                gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), getCurrentPlayer().getColorString());
                 currentGameState = GameState.SETTLE_PLAYERS;
                 break;
             case SETTLE_PLAYERS:

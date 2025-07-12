@@ -35,8 +35,40 @@ public class Player {
         materialContainer = new MaterialContainer();
     }
 
+    public String getColorString() {
+         if (color.equals(Color.RED)) {
+            return "Red";
+        } else if (color.equals(Color.BLUE)) {
+            return "Blue";
+        } else if (color.equals(Color.GREEN)) {
+            return "Green";
+        } else if (color.equals(Color.YELLOW)) {
+            return "Yellow";
+        } else if (color.equals(Color.WHITE)) {
+            return "White";
+        } else if (color.equals(Color.BLACK)) {
+            return "Black";
+        } else if (color.equals(Color.ORANGE)) {
+            return "Orange";
+        } else if (color.equals(Color.PINK)) {
+            return "Pink";
+        } else if (color.equals(Color.PURPLE)) {
+            return "Purple";
+        } else if (color.equals(Color.CYAN)) {
+            return "Cyan";
+        } else if (color.equals(Color.GRAY)) {
+            return "Gray";
+        } else {
+            return "Unknown Color";
+        }
+    }
+
     public boolean canAfford(BuildingType type) {
         return materialContainer.canAfford(type);
+    }
+
+    public void removeMaterialForBuilding(BuildingType type) {
+        materialContainer.removeMaterialForBuilding(type);
     }
 
     public int getTotalMaterialCount() {

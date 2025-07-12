@@ -32,4 +32,25 @@ public class MaterialContainer {
                 return false;
         }
     }
+
+    public void removeMaterialForBuilding(BuildingType type) {
+        switch (type) {
+            case STREET:
+                clayMaterialCount--;
+                woodMaterialCount--;
+                break;
+            case SETTLEMENT:
+                clayMaterialCount--;
+                woodMaterialCount--;
+                woolMaterialCount--;
+                wheatMaterialCount--;
+                break;
+            case CITY:
+                wheatMaterialCount -= 2;
+                oreMaterialCount -= 3;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown building type: " + type);
+        }
+    }
 }

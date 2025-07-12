@@ -251,11 +251,20 @@ public class CatanGameLogic {
                 }
                 // Annahme rolled number ist zahl => herausfinden, welches feld diese zahl hat
                 for (Tile tile : worldMap.getMapTiles()) {
-                    if (tile.getNumberValue() == this.rolledNumber) {
-                        MaterialType materialToGivePlayers = tile.getWorldTileType().getMaterialType();
-                        for (Player p : players) {
-                            p.addMaterial(materialToGivePlayers, 1);
-                        }
+                    if (tile.getNumberValue() != this.rolledNumber) continue;
+                    if (tile.isRobberPlaced()) continue;
+
+                    MaterialType materialToGivePlayers = tile.getWorldTileType().getMaterialType();
+
+                    List<NodeBuilding> buildingsOnTile = worldMap.getNodeBuildingsOnTile(tile);
+                    for (NodeBuilding building : buildingsOnTile) {
+                        Player player = building.getPlayer();
+                        int amount = switch (building.getBuildingType()) {
+                            case SETTLEMENT -> 1;
+                            case CITY -> 2;
+                            default -> 0;
+                        };
+                        player.addMaterial(materialToGivePlayers, amount);
                     }
                 }
                 nextRoundPhase();

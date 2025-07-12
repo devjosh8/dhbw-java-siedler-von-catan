@@ -171,7 +171,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         bandit.setPosition(tile);
     }
 
-
     private void highlightObjectUnderMouse(ModelBatch modelBatch, Environment environment) {
 
         Ray ray = modelBatch.getCamera().getPickRay(Gdx.input.getX(), Gdx.input.getY());
@@ -387,7 +386,6 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         }
     }
 
-
     public boolean canStreetBePlacedOnEdge(Edge edge) {
         if(edge == null) return false;
         for (Building building : buildings) {
@@ -398,5 +396,19 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             }
         }
         return true; // No street with this edge as position found
+    }
+
+    public List<NodeBuilding> getNodeBuildingsOnTile(Tile tile) {
+        List<NodeBuilding> nodeBuildingsOnTile = new ArrayList<>();
+        for (Building building : buildings) {
+            if (!(building instanceof NodeBuilding)) continue;
+            NodeBuilding nodeBuilding = (NodeBuilding) building;
+            nodeBuilding.getPosition().getNeighbourTiles().forEach(neighbourTile -> {
+                if (neighbourTile.equals(tile)) {
+                    nodeBuildingsOnTile.add(nodeBuilding);
+                }
+            });
+        }
+        return nodeBuildingsOnTile;
     }
 }

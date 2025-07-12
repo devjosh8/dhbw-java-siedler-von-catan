@@ -336,7 +336,17 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     }
 
     public boolean isSomethingHighlighted() {
-        return currentlyHighlightedTile != null || currentlyHighlightedNode != null || currentlyHighlightedEdge != null;
+        switch (getHighlightingType()) {
+            case TILE:
+                return currentlyHighlightedTile != null;
+            case EDGE:
+                return currentlyHighlightedEdge != null;
+            case NODE:
+                return currentlyHighlightedNode != null;
+            case NONE:
+            default:
+                return false;
+        }
     }
 
     public List<Tile> getMapTiles() {

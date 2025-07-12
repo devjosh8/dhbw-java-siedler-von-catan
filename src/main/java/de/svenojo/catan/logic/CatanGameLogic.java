@@ -1,6 +1,8 @@
 package de.svenojo.catan.logic;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.world.WorldMap;
@@ -55,10 +57,12 @@ public class CatanGameLogic {
     private GameState currentGameState;
     private RoundPhase currentRoundPhase;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private boolean playerPlacingBuilding = false;
     private boolean playerPlacingRobber = false;
     private BuildingType playerPlacingBuildingType = null;
+    private Queue<BuildingType> buildingQueue = new LinkedList<>();
 
     private List<Player> players;
     private int currentPlayerIndex;
@@ -73,7 +77,8 @@ public class CatanGameLogic {
         this.currentPlayerIndex = 0;
         this.rolledNumber = -1; // No dice rolled yet
 
-        letCurrentUserPlaceBuilding(BuildingType.SETTLEMENT);
+        letCurrentPlayerPlaceBuilding(BuildingType.SETTLEMENT);
+        letCurrentPlayerPlaceBuilding(BuildingType.STREET);
     }
 
     public Player getCurrentPlayer() {
@@ -96,23 +101,28 @@ public class CatanGameLogic {
         playerPlacingRobber = true;
     }
 
-    public void letCurrentUserPlaceBuilding(BuildingType buildingType) {
-
-        switch (buildingType) {
-            case CITY:
-                worldMap.setHighlightingType(HighlightingType.NODE);
-                break;
-        
-            case SETTLEMENT:
-                worldMap.setHighlightingType(HighlightingType.NODE);
-                break;
-            case STREET:
-                worldMap.setHighlightingType(HighlightingType.EDGE);
-            break;
+    public void letCurrentPlayerPlaceBuilding(BuildingType buildingType) {
+        buildingQueue.add(buildingType);
+        if (!playerPlacingBuilding) {
+            letCurrentPlayerPlaceNextBuilding();
         }
-        
+    }
+
+    /**
+     * 
+     * @return true -> finished all buildings, false -> still has to build
+     */
+    private boolean letCurrentPlayerPlaceNextBuilding() {
+        if (buildingQueue.isEmpty()) {
+            playerPlacingBuilding = false;
+            playerPlacingBuildingType = null;
+            worldMap.setHighlightingType(HighlightingType.NONE);
+            return true;
+        }
         playerPlacingBuilding = true;
-        playerPlacingBuildingType = buildingType;
+        playerPlacingBuildingType = buildingQueue.poll();
+        worldMap.setHighlightingType(HighlightingType.fromBuildingType(playerPlacingBuildingType));
+        return false;
     }
 
     public void onBuildingTouchDown() {
@@ -126,16 +136,20 @@ public class CatanGameLogic {
         }
         if (playerPlacingBuilding) {
             Building building = switch (playerPlacingBuildingType) {
-                case SETTLEMENT -> new BuildingSettlement(getCurrentPlayer(), worldMap.getCurrentlyHighlightedNode().get());
+                case SETTLEMENT ->
+                    new BuildingSettlement(getCurrentPlayer(), worldMap.getCurrentlyHighlightedNode().get());
                 case CITY -> new BuildingCity(getCurrentPlayer(), worldMap.getCurrentlyHighlightedNode().get());
                 case STREET -> new BuildingStreet(getCurrentPlayer(), worldMap.getCurrentlyHighlightedEdge().get());
                 default -> null;
             };
-            if (building == null) return;
-            
-            worldMap.setHighlightingType(HighlightingType.NONE);
-            playerPlacingBuilding = false;
+            if (building == null)
+                throw new Error("Building type " + playerPlacingBuildingType.toString() + "is not handled");
+
             worldMap.placeBuilding(getCurrentPlayer(), building);
+            boolean finishedBuilding = letCurrentPlayerPlaceNextBuilding();
+            if (finishedBuilding) {
+                //Continue game loop
+            }
         }
     }
     

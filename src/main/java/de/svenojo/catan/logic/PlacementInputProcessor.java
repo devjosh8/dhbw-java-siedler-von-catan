@@ -21,8 +21,11 @@ public class PlacementInputProcessor extends InputAdapter {
         if (button == Input.Buttons.LEFT) {
             if (!catanGameLogic.isPlayerPlacingBuilding())
                 return false;
-            if (!worldMap.isSomethingHighlighted())
+            if (!worldMap.isSomethingHighlighted()) {
+                Gdx.app.log("DEBUG", "Nothing is highlighted");
                 return false;
+            }
+            Gdx.app.log("DEBUG", "Currently Highlighted Type is " + worldMap.getHighlightingType());
             catanGameLogic.onBuildingTouchDown();
             return true;
         }

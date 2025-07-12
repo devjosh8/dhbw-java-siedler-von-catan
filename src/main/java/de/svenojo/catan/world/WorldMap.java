@@ -404,13 +404,14 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     public List<NodeBuilding> getNodeBuildingsOnTile(Tile tile) {
         List<NodeBuilding> nodeBuildingsOnTile = new ArrayList<>();
         for (Building building : buildings) {
-            if (!(building.getBuildingType() == BuildingType.SETTLEMENT || building.getBuildingType() == BuildingType.CITY)) continue;
+            if (building.getBuildingType() != BuildingType.SETTLEMENT && building.getBuildingType() != BuildingType.CITY) continue;
             NodeBuilding nodeBuilding = (NodeBuilding) building;
-            nodeBuilding.getPosition().getNeighbourTiles().forEach(neighbourTile -> {
-                if (neighbourTile.equals(tile)) {
-                    nodeBuildingsOnTile.add(nodeBuilding);
-                }
-            });
+            Node position = nodeBuilding.getPosition();
+
+            Set<Tile> neighbourTiles = position.getNeighbourTiles();
+            if (neighbourTiles.contains(tile)) {
+                nodeBuildingsOnTile.add(nodeBuilding);
+            }
         }
         return nodeBuildingsOnTile;
     }

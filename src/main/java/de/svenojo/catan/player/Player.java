@@ -2,6 +2,7 @@ package de.svenojo.catan.player;
 
 import java.util.HashMap;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 
 import de.svenojo.catan.world.building.BuildingType;
@@ -46,19 +47,19 @@ public class Player {
         switch (type) {
             case MaterialType.WOOD:
                 getMaterialContainer().setWoodMaterialCount(getMaterialContainer().getWoodMaterialCount() + amount);
-        
+                break;
             case MaterialType.WHEAT:
                 getMaterialContainer().setWheatMaterialCount(getMaterialContainer().getWheatMaterialCount() + amount);
-            
+                break;
             case MaterialType.WOOL:
                 getMaterialContainer().setWoolMaterialCount(getMaterialContainer().getWoolMaterialCount() + amount);
-           
+                break;
             case MaterialType.CLAY:
                 getMaterialContainer().setClayMaterialCount(getMaterialContainer().getClayMaterialCount() + amount);
-
+                break;
             case MaterialType.ORE:
                 getMaterialContainer().setOreMaterialCount(getMaterialContainer().getOreMaterialCount() + amount);
-
+                break;
             case MaterialType.NONE:
                 break;
         }
@@ -95,6 +96,7 @@ public class Player {
         materials.put(MaterialType.WOOL, getMaterialCount(MaterialType.WOOL));
         materials.put(MaterialType.CLAY, getMaterialCount(MaterialType.CLAY));
         materials.put(MaterialType.ORE, getMaterialCount(MaterialType.ORE));
+        Gdx.app.log("DEBUG", "Player " + name + " materials: " + materials.toString());
         return materials;
     }
 }

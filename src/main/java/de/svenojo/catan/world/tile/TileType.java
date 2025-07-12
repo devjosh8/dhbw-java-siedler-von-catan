@@ -15,7 +15,9 @@ public enum TileType {
     /** für Schaf / Wolle */
     PASTURE("data/models/karte_weideland.g3db", MaterialType.WOOL),
     /** Für Lehm */
-    HILLS("data/models/karte_lehm.g3db", MaterialType.CLAY);
+    HILLS("data/models/karte_lehm.g3db", MaterialType.CLAY),
+
+    HARBOUR("data/models/hafen_neu.g3db", MaterialType.NONE);
 
     private String fileName;
     private MaterialType materialType;

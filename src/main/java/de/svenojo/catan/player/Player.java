@@ -131,4 +131,13 @@ public class Player {
         Gdx.app.log("DEBUG", "Player " + name + " materials: " + materials.toString());
         return materials;
     }
+
+
+    public int getScore() {
+        return settlementAmount + (cityAmount * 2);
+    }
+
+    public boolean hasWon() {
+        return getScore() >= 10;
+    }
 }

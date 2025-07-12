@@ -175,6 +175,11 @@ public class CatanGameLogic {
             playerPlacingBuilding = false;
             playerPlacingBuildingType = null;
             worldMap.setHighlightingType(HighlightingType.NONE);
+
+            if (getCurrentPlayer().hasWon()) {
+                Gdx.app.log("DEBUG", "Player " + getCurrentPlayer().getName() + " has won the game!");
+                currentGameState = GameState.GAME_ENDING;
+            }
             return true;
         }
         playerPlacingBuilding = true;
@@ -379,6 +384,7 @@ public class CatanGameLogic {
                 currentRoundPhase = RoundPhase.DICE_ROLL;
                 break;
             case GAME_ENDING:
+                // TODO: Show game ending screen
             default:
                 System.err.println("The current GameState " + currentGameState.toString() + " cannot be played.");
                 break;

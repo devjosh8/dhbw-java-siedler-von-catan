@@ -38,6 +38,7 @@ import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.bandit.Bandit;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingCalculator;
+import de.svenojo.catan.world.building.BuildingType;
 import de.svenojo.catan.world.building.NodeBuilding;
 import de.svenojo.catan.world.building.buildings.BuildingHarbour;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
@@ -367,6 +368,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
             if (!(building instanceof NodeBuilding)) continue;
             NodeBuilding foundNodeBuilding = (NodeBuilding) building;
             if (foundNodeBuilding.getPosition().equals(nodeBuilding.getPosition())) {
+                if (foundNodeBuilding.getBuildingType() == BuildingType.HARBOUR) continue; // Harbours should not intervene Settlements 
                 nodeIsOccupied = true; // There is already a building on this node
                 nodeOccupiedByCurrentPlayer = foundNodeBuilding.getPlayer().equals(nodeBuilding.getPlayer());
                 break; // No need to check further, we found a building on this node
@@ -401,7 +403,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
     public List<NodeBuilding> getNodeBuildingsOnTile(Tile tile) {
         List<NodeBuilding> nodeBuildingsOnTile = new ArrayList<>();
         for (Building building : buildings) {
-            if (!(building instanceof NodeBuilding)) continue;
+            if (!(building.getBuildingType() == BuildingType.SETTLEMENT || building.getBuildingType() == BuildingType.CITY)) continue;
             NodeBuilding nodeBuilding = (NodeBuilding) building;
             nodeBuilding.getPosition().getNeighbourTiles().forEach(neighbourTile -> {
                 if (neighbourTile.equals(tile)) {

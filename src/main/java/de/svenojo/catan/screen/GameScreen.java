@@ -85,9 +85,9 @@ public class GameScreen implements Screen {
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         PlacementInputProcessor placementInputProcessor = new PlacementInputProcessor(catanGameLogic, worldMap);
+        inputMultiplexer.addProcessor(gameUI.getStage());
         inputMultiplexer.addProcessor(placementInputProcessor);
         inputMultiplexer.addProcessor(cameraInputController);
-        //TODO: add game ui input processor
         Gdx.input.setInputProcessor(inputMultiplexer);
     }
 

@@ -1,5 +1,7 @@
 package de.svenojo.catan.player;
 
+import java.util.HashMap;
+
 import com.badlogic.gdx.graphics.Color;
 
 import de.svenojo.catan.world.building.BuildingType;
@@ -84,5 +86,15 @@ public class Player {
         }
 
         return -99999;
+    }
+
+    public HashMap<MaterialType, Integer> getMaterials() {
+        HashMap<MaterialType, Integer> materials = new HashMap<>();
+        materials.put(MaterialType.WOOD, getMaterialCount(MaterialType.WOOD));
+        materials.put(MaterialType.WHEAT, getMaterialCount(MaterialType.WHEAT));
+        materials.put(MaterialType.WOOL, getMaterialCount(MaterialType.WOOL));
+        materials.put(MaterialType.CLAY, getMaterialCount(MaterialType.CLAY));
+        materials.put(MaterialType.ORE, getMaterialCount(MaterialType.ORE));
+        return materials;
     }
 }

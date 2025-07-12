@@ -8,4 +8,8 @@ public enum MaterialType {
     WOOL,
     CLAY,
     NONE;
+
+    public static MaterialType[] actualMaterialValues() {
+        return new MaterialType[] { WOOD, ORE, WHEAT, WOOL, CLAY };
+    }
 }

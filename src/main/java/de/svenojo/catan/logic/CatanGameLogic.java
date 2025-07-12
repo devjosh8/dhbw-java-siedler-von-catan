@@ -102,6 +102,7 @@ public class CatanGameLogic {
     public void nextPlayer() {
         this.currentPlayerIndex = (this.currentPlayerIndex + 1) % players.size();
         gameUI.updateCurrentPlayer(getCurrentPlayer().getName());
+        gameUI.updateMaterials(getCurrentPlayer().getMaterials());
     }
 
     private boolean firstSettleRoundComplete = false;
@@ -264,9 +265,11 @@ public class CatanGameLogic {
                             case CITY -> 2;
                             default -> 0;
                         };
+                        Gdx.app.log("DEBUG", "Giving " + amount + " " + materialToGivePlayers.name() + " to player: " + player.getName());
                         player.addMaterial(materialToGivePlayers, amount);
                     }
                 }
+                gameUI.updateMaterials(getCurrentPlayer().getMaterials());
                 nextRoundPhase();
                 break;
             case ROBBER:

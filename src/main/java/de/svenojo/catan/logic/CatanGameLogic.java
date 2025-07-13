@@ -231,6 +231,21 @@ public class CatanGameLogic {
                 // TODO: check if node connects to the existing player buildings, return if not possible
             }
 
+            // Remove settlement from the worldmap if a city is placed on it
+            if (building.getBuildingType() == BuildingType.CITY) {
+                NodeBuilding cityBuilding = (NodeBuilding) building;
+                for (Building foundBuilding : worldMap.getBuildings()) {
+                    if (foundBuilding.getBuildingType() != BuildingType.SETTLEMENT) {
+                        continue;
+                    }
+                    NodeBuilding settlementBuilding = (NodeBuilding) foundBuilding;
+                    if (settlementBuilding.getPosition().equals(cityBuilding.getPosition())) {
+                        Gdx.app.log("DEBUG", "Will place on Settlement and remove the settlement: " + settlementBuilding);
+                        worldMap.removeBuilding(getCurrentPlayer(), settlementBuilding);
+                    }
+                }
+            }            
+
             worldMap.placeBuilding(getCurrentPlayer(), building);
             boolean finishedBuilding = letCurrentPlayerPlaceNextBuilding();
             if (finishedBuilding && currentGameState.equals(GameState.SETTLE_PLAYERS)) {

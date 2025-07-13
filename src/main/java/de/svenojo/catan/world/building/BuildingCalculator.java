@@ -75,6 +75,8 @@ public class BuildingCalculator {
             instance.transform.setToTranslation(position);
             instance.transform.rotate(new Vector3(0, 1.0f, 0f), (float) (-theta));
             instance.transform.scale(0.006f, 0.008f, 0.008f);
+
+            instance.userData = buildingStreet;
             return instance;
         } else if(building instanceof NodeBuilding) {
 
@@ -88,6 +90,8 @@ public class BuildingCalculator {
 
             position.x = nodeBuilding.getPosition().getPosition().x;
             position.z = nodeBuilding.getPosition().getPosition().z;
+
+            instance.userData = nodeBuilding;
 
             if(building instanceof BuildingSettlement) {
                 position.y = 0.16f;

@@ -308,6 +308,48 @@ public class CatanGameLogic {
                     return;
                 }
                 // TODO: check if node connects to the existing player buildings, return if not possible
+
+                boolean allowed = true;
+
+                // Siedlung muss mindestens zwei Straßenlängen von anderen Siedlungen entfernt sein
+                for(Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
+                    Node source = worldMap.getNodeGraph().getEdgeSource(e);
+                    Node target = worldMap.getNodeGraph().getEdgeTarget(e);
+                    
+
+                    for(Building b : worldMap.getBuildings()) {
+                        if(b instanceof NodeBuilding) {
+                            NodeBuilding nb = (NodeBuilding) b;
+                            if(nb.getPosition().equals(source) || nb.getPosition().equals(target)) {
+                                allowed = false;
+                            }
+                        }
+                    }
+                }
+
+                boolean needed = false;
+
+                // Siedlung muss an eine eigene Straße angrenzen (nicht im settle players gamestate)
+                    System.out.println("check if on eigene straße");
+                    for(Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
+                        for(Building b : worldMap.getBuildings()) {
+                            if(b instanceof BuildingStreet) {
+                                BuildingStreet st = (BuildingStreet) b;
+                                if(st.getPosition().equals(e)) {
+                                    if(st.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                                        needed = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                
+
+                 if(!allowed) return;
+                 if(currentGameState != GameState.SETTLE_PLAYERS) {
+                    if(!needed) return;
+                 }
+                 
             }
 
             // Remove settlement from the worldmap if a city is placed on it

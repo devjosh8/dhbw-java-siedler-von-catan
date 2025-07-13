@@ -498,7 +498,7 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
         return currentlyHighlightedTile == null ? Optional.empty() : Optional.of(currentlyHighlightedTile);
     }
 
-    public Optional<Tile> getCurrentlyHighlightedHarbour() {
+    public Optional<HarbourTile> getCurrentlyHighlightedHarbour() {
         return currentlyHighlightedHarbourTile == null ? Optional.empty()
                 : Optional.of(currentlyHighlightedHarbourTile);
     }
@@ -529,6 +529,8 @@ public class WorldMap implements IRenderable, IRenderable2D, ITickable {
                 return currentlyHighlightedEdge != null;
             case NODE:
                 return currentlyHighlightedNode != null;
+            case HARBOUR:
+                return currentlyHighlightedHarbourTile != null;
             case NONE:
             default:
                 return false;

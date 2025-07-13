@@ -15,6 +15,8 @@ import de.svenojo.catan.logic.events.BuildCityEvent;
 import de.svenojo.catan.logic.events.BuildSettlementEvent;
 import de.svenojo.catan.logic.events.BuildStreetEvent;
 import de.svenojo.catan.logic.events.EndTurnEvent;
+import de.svenojo.catan.logic.events.TradeHarbourEvent;
+import de.svenojo.catan.logic.events.TryToConfirmTradeEvent;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.screen.EndScreen;
 import de.svenojo.catan.screen.ui.GameUI;
@@ -27,6 +29,7 @@ import de.svenojo.catan.world.building.buildings.BuildingCity;
 import de.svenojo.catan.world.building.buildings.BuildingSettlement;
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 import de.svenojo.catan.world.material.MaterialType;
+import de.svenojo.catan.world.tile.HarbourTile;
 import de.svenojo.catan.world.tile.Tile;
 import de.svenojo.catan.world.util.HighlightingType;
 import lombok.Getter;
@@ -81,6 +84,9 @@ public class CatanGameLogic {
     private boolean playerPlacingBuilding = false;
     @Getter
     private boolean playerPlacingRobber = false;
+    @Getter
+    private boolean playerTradingWithHarbour = false;
+
     private BuildingType playerPlacingBuildingType = null;
     private Queue<BuildingType> buildingQueue = new LinkedList<>();
 
@@ -191,6 +197,36 @@ public class CatanGameLogic {
         return false;
     }
 
+
+    public boolean isCurrentPlayerSettledOnHarbour(HarbourTile harbourTile) {
+        for (Building building : worldMap.getBuildings()) {
+            if (!(building instanceof NodeBuilding))
+                continue;
+            NodeBuilding nodeBuilding = (NodeBuilding) building;
+            if (nodeBuilding.getPlayer().equals(getCurrentPlayer()) && nodeBuilding.getPosition().isOnHarbour(harbourTile)) {
+                return true; // Player has a building on the harbour
+            }
+        }
+        return false; // Player does not have a building on the harbour
+    }
+
+    public boolean doesCurrentPlayerHaveEnoughMaterialsForTrade(MaterialType typeToGive, int amount) {
+        switch (typeToGive) {
+            case NONE:
+                for (MaterialType type : MaterialType.actualMaterialValues()) {    
+                    if (getCurrentPlayer().getMaterialCount(type) >= amount) {
+                        return true; // Player has enough of any material type
+                    }
+                }
+                break;
+            default:
+                if (getCurrentPlayer().getMaterialCount(typeToGive) >= amount) 
+                    return true;
+                break;
+        }
+        return false; // Player does not have enough materials for trade
+    }
+
     public void onMouseTouchDown() {
         if (playerPlacingRobber) {
             if (worldMap.getCurrentlyHighlightedTile().isPresent()) {
@@ -254,6 +290,30 @@ public class CatanGameLogic {
                     letCurrentPlayerSettle();
             }
         }
+        if (playerTradingWithHarbour) {
+            if (worldMap.getCurrentlyHighlightedHarbour().isPresent()) {
+                HarbourTile harbourTile = worldMap.getCurrentlyHighlightedHarbour().get();
+                worldMap.setHighlightingType(HighlightingType.NONE);
+                playerTradingWithHarbour = false;
+                int amountToGive = harbourTile.getMaterialType() == MaterialType.NONE ? 3 : 2;
+
+                if (!isCurrentPlayerSettledOnHarbour(harbourTile)) {
+                    Gdx.app.log("DEBUG", "Player " + getCurrentPlayer().getName() + " is not settled on harbour: " + harbourTile);
+                    gameUI.getButtonTable().setVisible(true);
+                    return; // Player cannot trade with harbour
+                }
+
+                if(!doesCurrentPlayerHaveEnoughMaterialsForTrade(harbourTile.getMaterialType(), amountToGive)) {
+                    Gdx.app.log("DEBUG", "Player " + getCurrentPlayer().getName() + " does not have enough materials to trade with harbour: " + harbourTile);
+                    gameUI.getButtonTable().setVisible(true);
+                    return; // Player does not have enough materials to trade with harbour
+                }
+
+                gameUI.showTradeDialog(amountToGive, new MaterialType[] { harbourTile.getMaterialType() }, MaterialType.actualMaterialValues());
+            } else {
+                Gdx.app.log("DEBUG", "No harbour selected for trading");
+            }
+        }
     }
 
     private void letCurrentPlayerSettle() {
@@ -267,6 +327,7 @@ public class CatanGameLogic {
             player.addMaterial(typeToReceive, 1);
         }
     }
+
 
     @Subscribe
     public void onEndTurnEvent(EndTurnEvent event) {
@@ -315,6 +376,34 @@ public class CatanGameLogic {
         gameUI.updateMaterials(getCurrentPlayer().getMaterials());
 
         letCurrentPlayerPlaceBuilding(type);
+    }
+
+
+    @Subscribe 
+    public void onTradeHarbourEvent(TradeHarbourEvent event) {
+        if (playerPlacingBuilding) {
+            Gdx.app.log("DEBUG", "Cannot trade with harbour while placing buildings");
+            return;
+        }
+        playerTradingWithHarbour = true;
+        worldMap.setHighlightingType(HighlightingType.HARBOUR);
+        gameUI.getButtonTable().setVisible(false);
+    }
+
+    @Subscribe
+    public void onTryToConfirmTradeEvent(TryToConfirmTradeEvent event) {
+        Player currentPlayer = getCurrentPlayer();
+        MaterialType typeToGive = event.typeToGive;
+        MaterialType typeToReceive = event.typeToReceive;
+        int amountToGive = event.amountToGive;
+        if (currentPlayer.getMaterialCount(typeToGive) < amountToGive) {
+            Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " does not have enough materials to trade: " + typeToGive);
+            return; // Player does not have enough materials to trade
+        }
+        Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " trades " + amountToGive + " " + typeToGive + " for 1 " + typeToReceive);
+        currentPlayer.addMaterial(typeToGive, -amountToGive);
+        currentPlayer.addMaterial(typeToReceive, 1);
+        gameUI.updateMaterials(currentPlayer.getMaterials());
     }
 
     /**

@@ -19,7 +19,7 @@ public class PlacementInputProcessor extends InputAdapter {
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         //Gdx.app.log("DEBUG","PlacementInputProcessor.touchDown() called with button: " + button);
         if (button == Input.Buttons.LEFT) {
-            if (!catanGameLogic.isPlayerPlacingBuilding() && !catanGameLogic.isPlayerPlacingRobber()) {
+            if (!catanGameLogic.isPlayerPlacingBuilding() && !catanGameLogic.isPlayerPlacingRobber() && !catanGameLogic.isPlayerTradingWithHarbour()) {
                 return false;
             }
             if (!worldMap.isSomethingHighlighted()) {

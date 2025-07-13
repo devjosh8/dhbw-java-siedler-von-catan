@@ -2,10 +2,8 @@ package de.svenojo.catan.world;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -35,12 +33,9 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.collision.Ray;
-import com.badlogic.gdx.utils.Array;
-
 import de.svenojo.catan.interfaces.IRenderable;
 import de.svenojo.catan.interfaces.IRenderable2D;
 import de.svenojo.catan.interfaces.ITickable;
-import de.svenojo.catan.math.AxialVector;
 import de.svenojo.catan.player.Player;
 import de.svenojo.catan.resources.CatanAssetManager;
 import de.svenojo.catan.world.bandit.Bandit;

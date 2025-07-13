@@ -2,10 +2,8 @@ package de.svenojo.catan.logic;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;

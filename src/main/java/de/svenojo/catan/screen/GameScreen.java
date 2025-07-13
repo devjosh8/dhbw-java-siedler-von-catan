@@ -23,9 +23,6 @@ import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.util.PlayerOptions;
 
-import de.svenojo.catan.world.building.buildings.BuildingStreet;
-import de.svenojo.util.PlayerOptions;
-
 
 public class GameScreen implements Screen {
     /**

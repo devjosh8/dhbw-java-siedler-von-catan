@@ -15,8 +15,6 @@ public class Player {
     private Color color;
     private String name;
 
-    private int score;
-
     private int streetAmount;
     private int settlementAmount;
     private int cityAmount;
@@ -27,7 +25,6 @@ public class Player {
         this.name = name;
         this.color = color;
 
-        score = 0;
         streetAmount = 0;
         settlementAmount = 0;
         cityAmount = 0;

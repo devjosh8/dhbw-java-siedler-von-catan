@@ -6,8 +6,6 @@ import java.util.Stack;
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
 
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.model.data.ModelMaterial.MaterialType;
 import com.badlogic.gdx.math.Vector3;
 
 import de.svenojo.catan.math.AxialVector;

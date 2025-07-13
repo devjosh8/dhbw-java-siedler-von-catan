@@ -67,6 +67,7 @@ public class CatanGameLogic {
             }
         }
     }
+
     private final CatanGame catanGame;
     private final WorldMap worldMap;
     private final GameUI gameUI;
@@ -95,7 +96,8 @@ public class CatanGameLogic {
 
     private int rolledNumber;
 
-    public CatanGameLogic(CatanGame catanGame, List<Player> players, WorldMap worldMap, GameUI gameUI, EventBus gameScreenEventBus) {
+    public CatanGameLogic(CatanGame catanGame, List<Player> players, WorldMap worldMap, GameUI gameUI,
+            EventBus gameScreenEventBus) {
         this.catanGame = catanGame;
         this.players = players;
         this.worldMap = worldMap;
@@ -126,16 +128,16 @@ public class CatanGameLogic {
     }
 
     public String colorToString(Color color) {
-        if(color == Color.RED) {
+        if (color == Color.RED) {
             return "Rot";
         }
-        if(color == Color.ROYAL) {
+        if (color == Color.ROYAL) {
             return "Grün";
         }
-        if(color == Color.SKY) {
+        if (color == Color.SKY) {
             return "Blau";
         }
-        if(color == Color.ORANGE) {
+        if (color == Color.ORANGE) {
             return "Gelb";
         }
 
@@ -215,13 +217,13 @@ public class CatanGameLogic {
         return false;
     }
 
-
     public boolean isCurrentPlayerSettledOnHarbour(HarbourTile harbourTile) {
         for (Building building : worldMap.getBuildings()) {
             if (!(building instanceof NodeBuilding))
                 continue;
             NodeBuilding nodeBuilding = (NodeBuilding) building;
-            if (nodeBuilding.getPlayer().equals(getCurrentPlayer()) && nodeBuilding.getPosition().isOnHarbour(harbourTile)) {
+            if (nodeBuilding.getPlayer().equals(getCurrentPlayer())
+                    && nodeBuilding.getPosition().isOnHarbour(harbourTile)) {
                 return true; // Player has a building on the harbour
             }
         }
@@ -231,14 +233,14 @@ public class CatanGameLogic {
     public boolean doesCurrentPlayerHaveEnoughMaterialsForTrade(MaterialType typeToGive, int amount) {
         switch (typeToGive) {
             case NONE:
-                for (MaterialType type : MaterialType.actualMaterialValues()) {    
+                for (MaterialType type : MaterialType.actualMaterialValues()) {
                     if (getCurrentPlayer().getMaterialCount(type) >= amount) {
                         return true; // Player has enough of any material type
                     }
                 }
                 break;
             default:
-                if (getCurrentPlayer().getMaterialCount(typeToGive) >= amount) 
+                if (getCurrentPlayer().getMaterialCount(typeToGive) >= amount)
                     return true;
                 break;
         }
@@ -274,30 +276,32 @@ public class CatanGameLogic {
                     Gdx.app.log("DEBUG", "Cannot place street on edge: " + edge);
                     return;
                 }
-                // TODO: check if street connects to current players buildings, return if not possible
+                // TODO: check if street connects to current players buildings, return if not
+                // possible
 
                 Node source = worldMap.getNodeGraph().getEdgeSource(edge);
                 Node target = worldMap.getNodeGraph().getEdgeTarget(edge);
-                
+
                 boolean allowed = false;
 
-                for(Building b : worldMap.getBuildings()) {
-                    if(b instanceof NodeBuilding) {
-                        if(((NodeBuilding)b).getPosition().equals(source) || ((NodeBuilding)b).getPosition().equals(target)) {
-                            if(b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                for (Building b : worldMap.getBuildings()) {
+                    if (b instanceof NodeBuilding) {
+                        if (((NodeBuilding) b).getPosition().equals(source)
+                                || ((NodeBuilding) b).getPosition().equals(target)) {
+                            if (b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
                                 allowed = true;
                             }
-                            
+
                         }
                     }
                 }
 
-                for(Edge e : worldMap.getNodeGraph().edgesOf(target)) {
-                    for(Building b : worldMap.getBuildings()) {
-                        if(b instanceof BuildingStreet) {
+                for (Edge e : worldMap.getNodeGraph().edgesOf(target)) {
+                    for (Building b : worldMap.getBuildings()) {
+                        if (b instanceof BuildingStreet) {
                             BuildingStreet newStreet = (BuildingStreet) b;
-                            if(newStreet.getPosition().equals(e)) {
-                                if(b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                            if (newStreet.getPosition().equals(e)) {
+                                if (b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
                                     allowed = true;
                                 }
                             }
@@ -305,12 +309,12 @@ public class CatanGameLogic {
                     }
                 }
 
-                for(Edge e : worldMap.getNodeGraph().edgesOf(source)) {
-                    for(Building b : worldMap.getBuildings()) {
-                        if(b instanceof BuildingStreet) {
+                for (Edge e : worldMap.getNodeGraph().edgesOf(source)) {
+                    for (Building b : worldMap.getBuildings()) {
+                        if (b instanceof BuildingStreet) {
                             BuildingStreet newStreet = (BuildingStreet) b;
-                            if(newStreet.getPosition().equals(e)) {
-                                if(b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                            if (newStreet.getPosition().equals(e)) {
+                                if (b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
                                     allowed = true;
                                 }
                             }
@@ -318,7 +322,10 @@ public class CatanGameLogic {
                     }
                 }
 
-                if(!allowed) return;
+                if (!allowed) {
+                    gameUI.showNotification("Straßen müssen an eine eigene Siedlung oder Stadt angrenzen", 4000);
+                    return;
+                }
             }
             if (building instanceof NodeBuilding) {
                 NodeBuilding nodeBuilding = (NodeBuilding) building;
@@ -326,20 +333,21 @@ public class CatanGameLogic {
                     Gdx.app.log("DEBUG", "Cannot place building on node: " + nodeBuilding);
                     return;
                 }
-                // TODO: check if node connects to the existing player buildings, return if not possible
+                // TODO: check if node connects to the existing player buildings, return if not
+                // possible
 
                 boolean allowed = true;
 
-                // Siedlung muss mindestens zwei Straßenlängen von anderen Siedlungen entfernt sein
-                for(Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
+                // Siedlung muss mindestens zwei Straßenlängen von anderen Siedlungen entfernt
+                // sein
+                for (Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
                     Node source = worldMap.getNodeGraph().getEdgeSource(e);
                     Node target = worldMap.getNodeGraph().getEdgeTarget(e);
-                    
 
-                    for(Building b : worldMap.getBuildings()) {
-                        if(b instanceof NodeBuilding) {
+                    for (Building b : worldMap.getBuildings()) {
+                        if (b instanceof NodeBuilding) {
                             NodeBuilding nb = (NodeBuilding) b;
-                            if(nb.getPosition().equals(source) || nb.getPosition().equals(target)) {
+                            if (nb.getPosition().equals(source) || nb.getPosition().equals(target)) {
                                 allowed = false;
                             }
                         }
@@ -348,27 +356,32 @@ public class CatanGameLogic {
 
                 boolean needed = false;
 
-                // Siedlung muss an eine eigene Straße angrenzen (nicht im settle players gamestate)
-                    System.out.println("check if on eigene straße");
-                    for(Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
-                        for(Building b : worldMap.getBuildings()) {
-                            if(b instanceof BuildingStreet) {
-                                BuildingStreet st = (BuildingStreet) b;
-                                if(st.getPosition().equals(e)) {
-                                    if(st.getPlayer().getName().equals(getCurrentPlayer().getName())) {
-                                        needed = true;
-                                    }
+                // Siedlung muss an eine eigene Straße angrenzen (nicht im settle players
+                // gamestate)
+                System.out.println("check if on eigene straße");
+                for (Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
+                    for (Building b : worldMap.getBuildings()) {
+                        if (b instanceof BuildingStreet) {
+                            BuildingStreet st = (BuildingStreet) b;
+                            if (st.getPosition().equals(e)) {
+                                if (st.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                                    needed = true;
                                 }
                             }
                         }
                     }
-                
+                }
 
-                 if(!allowed) return;
-                 if(currentGameState != GameState.SETTLE_PLAYERS) {
-                    if(!needed) return;
-                 }
-                 
+                if (!allowed) {
+                    gameUI.showNotification("Siedlungen müssen mindestens 2 Kanten von einander entfernt sein", 4000);
+                    return;
+                }
+                if (currentGameState != GameState.SETTLE_PLAYERS) {
+                    if (!needed)
+                        gameUI.showNotification("Siedlungen müssen an eine eigene Straße angrenzen", 4000);
+                    return;
+                }
+
             }
 
             // Remove settlement from the worldmap if a city is placed on it
@@ -380,11 +393,12 @@ public class CatanGameLogic {
                     }
                     NodeBuilding settlementBuilding = (NodeBuilding) foundBuilding;
                     if (settlementBuilding.getPosition().equals(cityBuilding.getPosition())) {
-                        Gdx.app.log("DEBUG", "Will place on Settlement and remove the settlement: " + settlementBuilding);
+                        Gdx.app.log("DEBUG",
+                                "Will place on Settlement and remove the settlement: " + settlementBuilding);
                         worldMap.removeBuilding(getCurrentPlayer(), settlementBuilding);
                     }
                 }
-            }            
+            }
 
             worldMap.placeBuilding(getCurrentPlayer(), building);
             boolean finishedBuilding = letCurrentPlayerPlaceNextBuilding();
@@ -402,18 +416,24 @@ public class CatanGameLogic {
                 int amountToGive = harbourTile.getMaterialType() == MaterialType.NONE ? 3 : 2;
 
                 if (!isCurrentPlayerSettledOnHarbour(harbourTile)) {
-                    Gdx.app.log("DEBUG", "Player " + getCurrentPlayer().getName() + " is not settled on harbour: " + harbourTile);
+                    Gdx.app.log("DEBUG",
+                            "Player " + getCurrentPlayer().getName() + " is not settled on harbour: " + harbourTile);
+                    gameUI.showNotification("Du musst auf dem Hafen siedeln, um damit zu handeln", 4000);
                     gameUI.getButtonTable().setVisible(true);
                     return; // Player cannot trade with harbour
                 }
 
-                if(!doesCurrentPlayerHaveEnoughMaterialsForTrade(harbourTile.getMaterialType(), amountToGive)) {
-                    Gdx.app.log("DEBUG", "Player " + getCurrentPlayer().getName() + " does not have enough materials to trade with harbour: " + harbourTile);
+                if (!doesCurrentPlayerHaveEnoughMaterialsForTrade(harbourTile.getMaterialType(), amountToGive)) {
+                    Gdx.app.log("DEBUG", "Player " + getCurrentPlayer().getName()
+                            + " does not have enough materials to trade with harbour: " + harbourTile);
+
+                    gameUI.showNotification("Du hast nicht genug Materialien, um mit dem Hafen zu handeln", 4000);
                     gameUI.getButtonTable().setVisible(true);
                     return; // Player does not have enough materials to trade with harbour
                 }
 
-                gameUI.showTradeDialog(amountToGive, new MaterialType[] { harbourTile.getMaterialType() }, MaterialType.actualMaterialValues());
+                gameUI.showTradeDialog(amountToGive, new MaterialType[] { harbourTile.getMaterialType() },
+                        MaterialType.actualMaterialValues());
             } else {
                 Gdx.app.log("DEBUG", "No harbour selected for trading");
             }
@@ -431,7 +451,6 @@ public class CatanGameLogic {
             player.addMaterial(typeToReceive, 1);
         }
     }
-
 
     @Subscribe
     public void onEndTurnEvent(EndTurnEvent event) {
@@ -461,18 +480,23 @@ public class CatanGameLogic {
         Player currentPlayer = getCurrentPlayer();
         if (!currentPlayer.canAfford(type)) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot afford building: " + type);
+            gameUI.showNotification("Du hast nicht genug Materialien, um " + type.name().toUpperCase() + " zu bauen",
+                    1000);
             return;
         }
         if (type == BuildingType.CITY && currentPlayer.getCityAmount() >= 4) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 4 cities");
+            gameUI.showNotification("Du kannst nicht mehr als 4 Städte bauen", 4000);
             return;
         }
         if (type == BuildingType.SETTLEMENT && currentPlayer.getSettlementAmount() >= 5) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 5 settlements");
+            gameUI.showNotification("Du kannst nicht mehr als 5 Siedlungen bauen", 4000);
             return;
         }
         if (type == BuildingType.STREET && currentPlayer.getStreetAmount() >= 15) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 15 streets");
+            gameUI.showNotification("Du kannst nicht mehr als 15 Straßen bauen", 4000);
             return;
         }
 
@@ -482,11 +506,11 @@ public class CatanGameLogic {
         letCurrentPlayerPlaceBuilding(type);
     }
 
-
-    @Subscribe 
+    @Subscribe
     public void onTradeHarbourEvent(TradeHarbourEvent event) {
         if (playerPlacingBuilding) {
             Gdx.app.log("DEBUG", "Cannot trade with harbour while placing buildings");
+            gameUI.showNotification("Du kannst nicht mit dem Hafen handeln, während du Gebäude platzierst", 4000);
             return;
         }
         playerTradingWithHarbour = true;
@@ -501,10 +525,13 @@ public class CatanGameLogic {
         MaterialType typeToReceive = event.typeToReceive;
         int amountToGive = event.amountToGive;
         if (currentPlayer.getMaterialCount(typeToGive) < amountToGive) {
-            Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " does not have enough materials to trade: " + typeToGive);
+            Gdx.app.log("DEBUG",
+                    "Player " + currentPlayer.getName() + " does not have enough materials to trade: " + typeToGive);
+            gameUI.showNotification("Du hast nicht genug " + typeToGive.name().toUpperCase() + " um zu handeln", 4000);
             return; // Player does not have enough materials to trade
         }
-        Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " trades " + amountToGive + " " + typeToGive + " for 1 " + typeToReceive);
+        Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " trades " + amountToGive + " " + typeToGive
+                + " for 1 " + typeToReceive);
         currentPlayer.addMaterial(typeToGive, -amountToGive);
         currentPlayer.addMaterial(typeToReceive, 1);
         gameUI.updateMaterials(currentPlayer.getMaterials());
@@ -599,7 +626,7 @@ public class CatanGameLogic {
                 // TODO: Show game ending screen
                 Gdx.app.log("DEBUG", "Game is ending. Player " + getCurrentPlayer().getName() + " has won!");
                 this.catanGame.setScreen(new EndScreen(catanGame, getCurrentPlayer()));
-                return; 
+                return;
             default:
                 System.err.println("The current GameState " + currentGameState.toString() + " cannot be played.");
                 break;

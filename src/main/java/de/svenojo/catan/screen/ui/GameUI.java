@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Dialog;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.SelectBox;
@@ -48,6 +50,8 @@ public class GameUI {
 
     private TextButton harbourTradeButton;
 
+    private Label notificationLabel;
+
     public GameUI(EventBus gameScreenEventBus) {
         this.gameScreenEventBus = gameScreenEventBus;
 
@@ -61,11 +65,18 @@ public class GameUI {
 
         table.top().left().pad(10);
 
+        // Noitification Label
+        notificationLabel = new Label("TEst", skin);
+        notificationLabel.setFontScale(1.2f);
+        notificationLabel.setColor(Color.WHITE);
+        notificationLabel.setWrap(true); // Aktiviert Zeilenumbruch
+
         // Rolled Number Label
         rolledNumberLabel = new Label("Geworfene Zahl: ", skin);
         rolledNumberLabel.setFontScale(2.0f);
 
-        table.add(rolledNumberLabel).expandX().left().row();
+        table.add(rolledNumberLabel).expandX().left(); // Rolled number on the left
+        table.add(notificationLabel).width(600).expandX().right().row(); // Notification on the right
 
         // Current Player Label
         currentPlayerLabel = new Label("Spieler: ", skin);
@@ -132,7 +143,7 @@ public class GameUI {
                     @Override
                     public void clicked(InputEvent event, float x, float y) {
                         Gdx.app.log("DEBUG", "Bank Trade Button clicked");
-                        
+
                         buttonTable.setVisible(false); // Hide the button table to show trade dialog
                         showTradeDialog(4, MaterialType.actualMaterialValues(), MaterialType.actualMaterialValues());
                     }
@@ -216,7 +227,7 @@ public class GameUI {
         receiveMaterialDropdown.setItems(materialsToReceive); // Populate with all material types
 
         // Add dropdowns to the dialog
-        tradeDialog.getContentTable().add("Geben: (" + amountToGive +")").pad(10);
+        tradeDialog.getContentTable().add("Geben: (" + amountToGive + ")").pad(10);
         tradeDialog.getContentTable().add(giveMaterialDropdown).pad(10).row();
         tradeDialog.getContentTable().add("Erhalten: (1)").pad(10);
         tradeDialog.getContentTable().add(receiveMaterialDropdown).pad(10).row();
@@ -256,6 +267,22 @@ public class GameUI {
 
         // Show the dialog
         tradeDialog.show(stage);
+    }
+
+    public void showNotification(String message, float duration) {
+
+        notificationLabel.setText(message);
+        notificationLabel.setColor(Color.WHITE); // Set the color to white
+        notificationLabel.setVisible(true);
+
+        // Schedule hiding the notification after the specified duration
+        notificationLabel.addAction(Actions.sequence(
+                Actions.alpha(0),
+                Actions.fadeIn(0.5f),
+                Actions.delay(duration / 1000f),
+                Actions.fadeOut(0.5f),
+                Actions.run(() -> notificationLabel.setVisible(false)) // Hide after fading out
+        ));
     }
 
     public void render(float delta) {

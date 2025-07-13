@@ -1,10 +1,9 @@
 package de.svenojo.catan.screen;
 
-import java.util.Random;
-
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -13,14 +12,16 @@ import com.badlogic.gdx.graphics.g3d.ModelBatch;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.environment.DirectionalLight;
 import com.badlogic.gdx.graphics.g3d.utils.CameraInputController;
+import com.google.common.eventbus.EventBus;
 
 import de.svenojo.catan.core.CatanGame;
-import de.svenojo.catan.player.Player;
+import de.svenojo.catan.logic.CatanGameLogic;
+import de.svenojo.catan.logic.PlacementInputProcessor;
 import de.svenojo.catan.resources.CatanAssetManager;
-import de.svenojo.catan.world.Edge;
+import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.MapWater;
 import de.svenojo.catan.world.WorldMap;
-import de.svenojo.catan.world.building.buildings.BuildingSettlement;
+import de.svenojo.util.PlayerOptions;
 
 import de.svenojo.catan.world.building.buildings.BuildingStreet;
 import de.svenojo.util.PlayerOptions;
@@ -43,6 +44,11 @@ public class GameScreen implements Screen {
     private boolean assetsLoading;
 
     private CatanGame catanGame;
+    private CatanGameLogic catanGameLogic;
+
+    private EventBus gameScreenEventBus = new EventBus();
+
+    private GameUI gameUI;
 
     public GameScreen(CatanGame catanGame, PlayerOptions playerOptions) {
         this.catanGame = catanGame;
@@ -65,9 +71,14 @@ public class GameScreen implements Screen {
         cameraInputController.rotateRightKey = 0;
         cameraInputController.forwardKey = 0;
         cameraInputController.backwardKey = 0;
-        Gdx.input.setInputProcessor(cameraInputController);
+        cameraInputController.rotateButton = Input.Buttons.RIGHT; // use right for rotate
+        cameraInputController.translateButton = Input.Buttons.MIDDLE; // use middle for translate
+        cameraInputController.forwardButton = -1;
 
+        
         Gdx.gl.glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+
+        gameUI = new GameUI(gameScreenEventBus);
 
         catanAssetManager = catanGame.getCatanAssetManager();
 
@@ -75,26 +86,27 @@ public class GameScreen implements Screen {
         worldMap.generateMap();
         mapWater = new MapWater(catanAssetManager);
         assetsLoading = true;
+
+        catanGameLogic = new CatanGameLogic(catanGame, playerOptions.getplayerList(), worldMap, gameUI, gameScreenEventBus);
+
+        InputMultiplexer inputMultiplexer = new InputMultiplexer();
+        PlacementInputProcessor placementInputProcessor = new PlacementInputProcessor(catanGameLogic, worldMap);
+        inputMultiplexer.addProcessor(gameUI.getStage());
+        inputMultiplexer.addProcessor(placementInputProcessor);
+        inputMultiplexer.addProcessor(cameraInputController);
+        Gdx.input.setInputProcessor(inputMultiplexer);
     }
 
     private void doneLoading() {
         worldMap.loadAssets();
         mapWater.loadAssets();
 
-        // TODO: zum späteren Zeitpunkt entfernen
-        // Testweise Buildings hinzufügen
-        Player player = new Player("bob", Color.RED);
-        for(Edge node : worldMap.getNodeGraph().edgeSet()) {
-            if(new Random().nextInt(3) == 0) {
-                //BuildingStreet street = new BuildingStreet(player, edge);
-                BuildingSettlement settlement = new BuildingSettlement(player, worldMap.getNodeGraph().getEdgeSource(node));
-                worldMap.placeBuilding(player, settlement);
-            }
-        }
-
+        //Start game logic
         assetsLoading = false;
     }
     
+    private CatanGameLogic.GameState lastGameState = null;
+    private CatanGameLogic.RoundPhase lastRoundPhase = null;
     @Override
     public void render(float delta) {
         if(assetsLoading && catanAssetManager.getAssetManager().update()) doneLoading();
@@ -115,12 +127,25 @@ public class GameScreen implements Screen {
         } 
 
         spriteBatch.end();
+
+        if (catanGameLogic.getCurrentGameState() != lastGameState) {
+            lastGameState = catanGameLogic.getCurrentGameState();
+            catanGameLogic.playGameState();
+        }
+        if (catanGameLogic.getCurrentRoundPhase() != lastRoundPhase) {
+            lastRoundPhase = catanGameLogic.getCurrentRoundPhase();
+            catanGameLogic.playRoundPhase();
+        }
+
+        gameUI.render(delta);
     }
 
     @Override
     public void dispose() {
         modelBatch.dispose();
         worldMap.dispose();
+
+        gameUI.dispose();
     }
 
     @Override

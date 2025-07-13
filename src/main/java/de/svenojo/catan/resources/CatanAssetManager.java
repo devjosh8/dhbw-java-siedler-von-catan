@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 
 import de.svenojo.catan.core.Globals;
 import de.svenojo.catan.world.building.BuildingType;
+import de.svenojo.catan.world.material.MaterialType;
 import de.svenojo.catan.world.tile.TileType;
 
 public class CatanAssetManager {
@@ -51,6 +52,13 @@ public class CatanAssetManager {
         for(BuildingType type : BuildingType.values()) {
             loadModel(type.getFileName());
         }
+
+        // Modelle für Gebäude initialisieren
+        for(MaterialType type : MaterialType.values()) {
+            loadTexture(type.getFileName());
+        }
+
+        loadModel("data/models/bandit.g3db");
 
         FreeTypeFontGenerator robotoGenerator = new FreeTypeFontGenerator(Gdx.files.internal("data/fonts/Roboto-Bold.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter robotoParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
@@ -141,5 +149,15 @@ public class CatanAssetManager {
 	 */
 	public synchronized void loadModel(String fileName) {
 		assetManager.load(fileName, Model.class);
+	}
+
+    /** @param fileName Dateipfad der Datei
+	 */
+	public synchronized void loadTexture(String fileName) {
+		assetManager.load(fileName, Texture.class);
+	}
+
+    public synchronized Texture getTexture(String fileName) {
+		return assetManager.get(fileName, Texture.class);
 	}
 }

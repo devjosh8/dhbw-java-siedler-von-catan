@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Queue;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
@@ -119,8 +120,26 @@ public class CatanGameLogic {
 
     public void nextPlayer() {
         this.currentPlayerIndex = (this.currentPlayerIndex + 1) % players.size();
-        gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), getCurrentPlayer().getColorString());
+
+        gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), colorToString(getCurrentPlayer().getColor()));
         gameUI.updateMaterials(getCurrentPlayer().getMaterials());
+    }
+
+    public String colorToString(Color color) {
+        if(color == Color.RED) {
+            return "Rot";
+        }
+        if(color == Color.ROYAL) {
+            return "Grün";
+        }
+        if(color == Color.SKY) {
+            return "Blau";
+        }
+        if(color == Color.ORANGE) {
+            return "Gelb";
+        }
+
+        return "ERROR";
     }
 
     private boolean firstSettleRoundComplete = false;

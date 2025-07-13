@@ -61,7 +61,7 @@ public class GameUI {
         Table table = new Table();
         table.setFillParent(true);
         stage.addActor(table);
-        table.setDebug(true);
+        table.setDebug(false);
 
         table.top().left().pad(10);
 

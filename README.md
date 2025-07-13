@@ -15,28 +15,9 @@ Die Jar wird bereits als "Fat-Jar" gebaut und kann somit ohne weitere installier
 
 **WICHTIG: Java Version 21 verwenden!**
 
-## Verwendete Abhängigkeiten
+### Hinweis für MacOS
 
-Wir verwenden [LibGDX](https://libgdx.com/wiki/) als Hauptlibrary für das Spiel. Dazu am besten Tutorials oder Demos angucken, das meiste ist eigentlich selbsterklärend.
-Weitere Abhängigkeiten:
-* [JGraphT](https://jgrapht.org/) 1.5.2 für eine graphentheoretische Darstellung von Ecken und Kanten
-* [JUnit](https://junit.org/junit5/) 5.13 für Unittests
-
-## Clean Code
-
-Bitte an [Java Clean Code](https://www.baeldung.com/java-clean-code) halten. Auch hier ist das meiste selbsterklärend. Je mehr `final` desto besser! (bei Java kann das anscheinend Performance-technisch schon ein bisschen ausmachen!)
-
-### Kommentare
-Der Spruch "guter Code muss nicht kommentiert werden" ist dumm. Bitte komplexere Methoden kommentieren, die vom Name her nicht **sofort** selbsterklärend sind. Auch gerne hin und wieder im Code kommentieren, 
-wenn gerade ein komplexerer Ablauf stattfindet. Solange die Kommentare helfen den Code besser zu verstehen oder einordnen zu können, sind Kommentare gerne gewollt!
-
-Bitte aber nicht zu Kommentaren oder "Doc-Strings" gezwungen fühlen, wobei hier auch für komplexere Methoden gilt, dass diese Abhilfe beim Verständnis schaffen können und die Docstrings in Java auch dazu gut sind,
-Argumente einer Funktion zu erläutern. Mehr Information hier: https://www.oracle.com/de/technical-resources/articles/java/javadoc-tool.html (Ein bisschen runterscrollen: "@param"-Verwendung ist super, weil dadurch Argumente
-besser erklärt werden können)
-
-### Commit Guidelines
-
-Bitte an Commit Guidelines halten, damit am Ende alles geil aussieht: [Commit Guidelines](https://www.conventionalcommits.org/en/v1.0.0/#summary)
+Das Spiel ist für Windows gemacht. Das Auführen auf macOS führt zu UI-Bugs und funktioniert nicht richtig. Deshalb bitte nur unter Windows verwenden.
 
 
 

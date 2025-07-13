@@ -175,10 +175,11 @@ public class CatanGameLogic {
     public void nextRoundPhase() {
         NextPhaseResult result = this.currentRoundPhase.next();
         currentRoundPhase = result.getNextPhase();
-        if (result.isFullRoundCompleted())
+        if (result.isFullRoundCompleted()) {
             nextPlayer();
-        gameUI.getEndTurnButton().setVisible(false); // Hide the button after the round is done
-        gameUI.getButtonTable().setVisible(false);
+            gameUI.getEndTurnButton().setVisible(false); // Hide the button after the round is done
+            gameUI.getButtonTable().setVisible(false);
+        }
     }
 
     public void letCurrentPlayerPlaceRobber() {

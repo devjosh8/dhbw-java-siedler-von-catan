@@ -126,8 +126,22 @@ public class GameUI {
                     }
                 });
 
+        // Bank Trade Button
+        TextButton bankTradeButton = new TextButton("Handel mit Bank", skin);
+        bankTradeButton.addListener(
+                new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Gdx.app.log("DEBUG", "Bank Trade Button clicked");
+                        
+                        buttonTable.setVisible(false); // Hide the button table to show trade dialog
+                        showTradeDialog(4, MaterialType.actualMaterialValues(), MaterialType.actualMaterialValues());
+                    }
+                });
+
         // Add Harbour Trade Button to the button table
-        buttonTable.add(harbourTradeButton).expandX().fillX().padBottom(20).row();
+        buttonTable.add(bankTradeButton).expandX().fillX().padBottom(10).row();
+        buttonTable.add(harbourTradeButton).expandX().fillX().padBottom(30).row();
         buttonTable.add(buildStreetButton).expandX().fillX().padBottom(10).row();
         buttonTable.add(buildSettlementButton).expandX().fillX().padBottom(10).row();
         buttonTable.add(buildCityButton).expandX().fillX().padBottom(10).row();

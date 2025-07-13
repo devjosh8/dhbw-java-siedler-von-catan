@@ -358,7 +358,6 @@ public class CatanGameLogic {
 
                 // Siedlung muss an eine eigene Straße angrenzen (nicht im settle players
                 // gamestate)
-                System.out.println("check if on eigene straße");
                 for (Edge e : worldMap.getNodeGraph().edgesOf(nodeBuilding.getPosition())) {
                     for (Building b : worldMap.getBuildings()) {
                         if (b instanceof BuildingStreet) {

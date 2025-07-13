@@ -83,7 +83,7 @@ public class GameScreen implements Screen {
         mapWater = new MapWater(catanAssetManager);
         assetsLoading = true;
 
-        catanGameLogic = new CatanGameLogic(playerOptions.getplayerList(), worldMap, gameUI, gameScreenEventBus);
+        catanGameLogic = new CatanGameLogic(catanGame, playerOptions.getplayerList(), worldMap, gameUI, gameScreenEventBus);
 
         InputMultiplexer inputMultiplexer = new InputMultiplexer();
         PlacementInputProcessor placementInputProcessor = new PlacementInputProcessor(catanGameLogic, worldMap);

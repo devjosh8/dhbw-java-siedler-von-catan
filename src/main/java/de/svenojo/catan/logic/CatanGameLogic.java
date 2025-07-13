@@ -10,11 +10,13 @@ import com.badlogic.gdx.Gdx;
 import com.google.common.eventbus.EventBus;
 import com.google.common.eventbus.Subscribe;
 
+import de.svenojo.catan.core.CatanGame;
 import de.svenojo.catan.logic.events.BuildCityEvent;
 import de.svenojo.catan.logic.events.BuildSettlementEvent;
 import de.svenojo.catan.logic.events.BuildStreetEvent;
 import de.svenojo.catan.logic.events.EndTurnEvent;
 import de.svenojo.catan.player.Player;
+import de.svenojo.catan.screen.EndScreen;
 import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.Edge;
 import de.svenojo.catan.world.WorldMap;
@@ -62,7 +64,7 @@ public class CatanGameLogic {
             }
         }
     }
-
+    private final CatanGame catanGame;
     private final WorldMap worldMap;
     private final GameUI gameUI;
     private final EventBus gameScreenEventBus;
@@ -87,7 +89,8 @@ public class CatanGameLogic {
 
     private int rolledNumber;
 
-    public CatanGameLogic(List<Player> players, WorldMap worldMap, GameUI gameUI, EventBus gameScreenEventBus) {
+    public CatanGameLogic(CatanGame catanGame, List<Player> players, WorldMap worldMap, GameUI gameUI, EventBus gameScreenEventBus) {
+        this.catanGame = catanGame;
         this.players = players;
         this.worldMap = worldMap;
         this.gameUI = gameUI;
@@ -386,6 +389,9 @@ public class CatanGameLogic {
                 break;
             case GAME_ENDING:
                 // TODO: Show game ending screen
+                Gdx.app.log("DEBUG", "Game is ending. Player " + getCurrentPlayer().getName() + " has won!");
+                this.catanGame.setScreen(new EndScreen(catanGame, getCurrentPlayer()));
+                return; 
             default:
                 System.err.println("The current GameState " + currentGameState.toString() + " cannot be played.");
                 break;

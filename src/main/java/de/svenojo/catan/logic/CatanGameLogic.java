@@ -19,6 +19,7 @@ import de.svenojo.catan.player.Player;
 import de.svenojo.catan.screen.EndScreen;
 import de.svenojo.catan.screen.ui.GameUI;
 import de.svenojo.catan.world.Edge;
+import de.svenojo.catan.world.Node;
 import de.svenojo.catan.world.WorldMap;
 import de.svenojo.catan.world.building.Building;
 import de.svenojo.catan.world.building.BuildingType;
@@ -255,6 +256,50 @@ public class CatanGameLogic {
                     return;
                 }
                 // TODO: check if street connects to current players buildings, return if not possible
+
+                Node source = worldMap.getNodeGraph().getEdgeSource(edge);
+                Node target = worldMap.getNodeGraph().getEdgeTarget(edge);
+                
+                boolean allowed = false;
+
+                for(Building b : worldMap.getBuildings()) {
+                    if(b instanceof NodeBuilding) {
+                        if(((NodeBuilding)b).getPosition().equals(source) || ((NodeBuilding)b).getPosition().equals(target)) {
+                            if(b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                                allowed = true;
+                            }
+                            
+                        }
+                    }
+                }
+
+                for(Edge e : worldMap.getNodeGraph().edgesOf(target)) {
+                    for(Building b : worldMap.getBuildings()) {
+                        if(b instanceof BuildingStreet) {
+                            BuildingStreet newStreet = (BuildingStreet) b;
+                            if(newStreet.getPosition().equals(e)) {
+                                if(b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                                    allowed = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                for(Edge e : worldMap.getNodeGraph().edgesOf(source)) {
+                    for(Building b : worldMap.getBuildings()) {
+                        if(b instanceof BuildingStreet) {
+                            BuildingStreet newStreet = (BuildingStreet) b;
+                            if(newStreet.getPosition().equals(e)) {
+                                if(b.getPlayer().getName().equals(getCurrentPlayer().getName())) {
+                                    allowed = true;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if(!allowed) return;
             }
             if (building instanceof NodeBuilding) {
                 NodeBuilding nodeBuilding = (NodeBuilding) building;

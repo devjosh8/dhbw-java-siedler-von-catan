@@ -66,7 +66,7 @@ public class GameUI {
         table.top().left().pad(10);
 
         // Noitification Label
-        notificationLabel = new Label("TEst", skin);
+        notificationLabel = new Label("", skin);
         notificationLabel.setFontScale(1.2f);
         notificationLabel.setColor(Color.WHITE);
         notificationLabel.setWrap(true); // Aktiviert Zeilenumbruch

@@ -9,8 +9,8 @@ import lombok.Setter;
 public class MaterialContainer {
     
     private int woodMaterialCount = 0;
-    private int oreMaterialCount = 10;
-    private int wheatMaterialCount = 5;
+    private int oreMaterialCount = 0;
+    private int wheatMaterialCount = 0;
     private int woolMaterialCount = 0;
     private int clayMaterialCount = 0;
 

@@ -128,16 +128,16 @@ public class CatanGameLogic {
     }
 
     public String colorToString(Color color) {
-        if (color == Color.RED) {
+        if (color.equals(Color.RED)) {
             return "Rot";
         }
-        if (color == Color.ROYAL) {
-            return "Grün";
+        if (color.equals(Color.ROYAL)) {
+            return "Dunkelblau";
         }
-        if (color == Color.SKY) {
-            return "Blau";
+        if (color.equals(Color.SKY)) {
+            return "Hell Blau";
         }
-        if (color == Color.ORANGE) {
+        if (color.equals(Color.ORANGE)) {
             return "Gelb";
         }
 
@@ -168,7 +168,7 @@ public class CatanGameLogic {
             return false;
         }
         currentPlayerIndex = (currentPlayerIndex - 1);
-        gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), getCurrentPlayer().getColorString());
+        gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), colorToString(getCurrentPlayer().getColor()));
         return true;
     }
 
@@ -323,7 +323,7 @@ public class CatanGameLogic {
                 }
 
                 if (!allowed) {
-                    gameUI.showNotification("Straßen müssen an eine eigene Siedlung oder Stadt angrenzen", 4000);
+                    gameUI.showNotification("Straßen sollen an eine eigene Siedlung oder Stadt angrenzen", 4000);
                     return;
                 }
             }
@@ -372,12 +372,12 @@ public class CatanGameLogic {
                 }
 
                 if (!allowed) {
-                    gameUI.showNotification("Siedlungen müssen mindestens 2 Kanten von einander entfernt sein", 4000);
+                    gameUI.showNotification("Siedlungen sollen mindestens 2 Kanten von einander entfernt sein", 4000);
                     return;
                 }
                 if (currentGameState != GameState.SETTLE_PLAYERS) {
                     if (!needed)
-                        gameUI.showNotification("Siedlungen müssen an eine eigene Straße angrenzen", 4000);
+                        gameUI.showNotification("Siedlungen sollen an eine eigene Straße angrenzen", 4000);
                     return;
                 }
 
@@ -440,6 +440,7 @@ public class CatanGameLogic {
     }
 
     private void letCurrentPlayerSettle() {
+        gameUI.showNotification("Bitte erste Siedlung und Strasse platzieren", 6000);
         letCurrentPlayerPlaceBuilding(BuildingType.SETTLEMENT);
         letCurrentPlayerPlaceBuilding(BuildingType.STREET);
     }
@@ -485,17 +486,17 @@ public class CatanGameLogic {
         }
         if (type == BuildingType.CITY && currentPlayer.getCityAmount() >= 4) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 4 cities");
-            gameUI.showNotification("Du kannst nicht mehr als 4 Städte bauen", 4000);
+            gameUI.showNotification("Du kannst nicht mehr als 4 CITIES bauen", 4000);
             return;
         }
         if (type == BuildingType.SETTLEMENT && currentPlayer.getSettlementAmount() >= 5) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 5 settlements");
-            gameUI.showNotification("Du kannst nicht mehr als 5 Siedlungen bauen", 4000);
+            gameUI.showNotification("Du kannst nicht mehr als 5 SETTLEMENTS bauen", 4000);
             return;
         }
         if (type == BuildingType.STREET && currentPlayer.getStreetAmount() >= 15) {
             Gdx.app.log("DEBUG", "Player " + currentPlayer.getName() + " cannot build more than 15 streets");
-            gameUI.showNotification("Du kannst nicht mehr als 15 Straßen bauen", 4000);
+            gameUI.showNotification("Du kannst nicht mehr als 15 STREETS bauen", 4000);
             return;
         }
 
@@ -509,7 +510,7 @@ public class CatanGameLogic {
     public void onTradeHarbourEvent(TradeHarbourEvent event) {
         if (playerPlacingBuilding) {
             Gdx.app.log("DEBUG", "Cannot trade with harbour while placing buildings");
-            gameUI.showNotification("Du kannst nicht mit dem Hafen handeln, während du Gebäude platzierst", 4000);
+            gameUI.showNotification("Du kannst nicht mit dem Hafen handeln, solange du baust", 4000);
             return;
         }
         playerTradingWithHarbour = true;
@@ -610,7 +611,7 @@ public class CatanGameLogic {
         switch (currentGameState) {
             case PRE_GAME:
                 // Players could be shuffled or try to roll higher than each other
-                gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), getCurrentPlayer().getColorString());
+                gameUI.updateCurrentPlayer(getCurrentPlayer().getName(), colorToString(getCurrentPlayer().getColor()));
                 currentGameState = GameState.SETTLE_PLAYERS;
                 break;
             case SETTLE_PLAYERS:

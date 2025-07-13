@@ -108,8 +108,10 @@ public class PlayerSelectorScreen implements Screen {
         selectorDescription.setFontScale(1f);
 
         SelectBox<Integer> playerCountBox = new SelectBox<>(skin);
+
         playerCountBox.setItems(4, 3, 2);
         playerCountBox.setSelected(4);
+
         Table playerCountRow = new Table();
         playerCountRow.add(playerCounterDescription).padRight(30);
         playerCountRow.add(playerCountBox);

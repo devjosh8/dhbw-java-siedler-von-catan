@@ -418,7 +418,7 @@ public class CatanGameLogic {
                 if (!isCurrentPlayerSettledOnHarbour(harbourTile)) {
                     Gdx.app.log("DEBUG",
                             "Player " + getCurrentPlayer().getName() + " is not settled on harbour: " + harbourTile);
-                    gameUI.showNotification("Du musst auf dem Hafen siedeln, um damit zu handeln", 4000);
+                    gameUI.showNotification("Du musst auf dem Hafen siedeln, um damit zu handeln", 6000);
                     gameUI.getButtonTable().setVisible(true);
                     return; // Player cannot trade with harbour
                 }
@@ -517,6 +517,7 @@ public class CatanGameLogic {
         playerTradingWithHarbour = true;
         worldMap.setHighlightingType(HighlightingType.HARBOUR);
         gameUI.getButtonTable().setVisible(false);
+        gameUI.showNotification("Klicke auf den Hafen mit dem du Handeln willst", 5000);
     }
 
     @Subscribe
